@@ -270,6 +270,12 @@ with tab1:
                         PROCESSES,
                         help="Sélectionnez tous les processus impactés"
                     )
+                # Ajout du bouton submit
+                submitted = st.form_submit_button("Ajouter le risque")
+                if submitted and risk_name:
+                    add_risk(family_key, risk_name, risk_desc, selected_processes)
+                    st.success("Risque ajouté")
+                    st.rerun()
 
             # Liste des risques existants
             for risk_key, risk_data in family_data["risks"].items():
