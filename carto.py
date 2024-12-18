@@ -2,6 +2,35 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Search, ChevronDown, ChevronRight, Plus, Edit2, Trash2, Save, X, Upload, Download, ChevronLeft } from 'lucide-react';
 
+const initialRiskFamilies = {
+  "CAD": {
+    name: "Cadeaux et Invitations",
+    risks: {}
+  },
+  "CON": {
+    name: "Conflits d'intérêts",
+    risks: {}
+  },
+  "COR": {
+    name: "Corruption",
+    risks: {}
+  },
+  "FAV": {
+    name: "Favoritisme",
+    risks: {}
+  },
+  "FRAUD": {
+    name: "Fraude",
+    risks: {}
+  },
+  "MGMT": {
+    name: "Management",
+    risks: {}
+  }
+};
+
+const RiskManagementTool = () => {
+
 const RiskManagementTool = () => {
   // États de base
   const [selectedProcess, setSelectedProcess] = useState('all');
