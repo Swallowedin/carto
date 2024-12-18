@@ -6,11 +6,11 @@ import base64
 import plotly.graph_objects as go
 from collections import defaultdict
 
-# Configuration de la page
+# Configuration de la page (une seule fois)
 st.set_page_config(
     page_title="Gestion des Risques",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Sidebar repliée par défaut
+    initial_sidebar_state="collapsed"
 )
 
 # Initialisation des données dans la session state
