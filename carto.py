@@ -196,9 +196,21 @@ def export_data():
 with st.sidebar:
     with st.container():
         st.header("Filtres", divider='blue')
-        selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES, label_visibility="collapsed")
-        selected_measure_type = st.selectbox("Type de Mesure", ["Tous"] + list(MEASURE_TYPES.values()), label_visibility="collapsed")
-        search_term = st.text_input("Recherche", placeholder="Rechercher...", label_visibility="collapsed")
+        selected_process = st.selectbox(
+            "Processus", 
+            ["Tous"] + PROCESSES, 
+            help="Filtrer les risques par processus"
+        )
+        selected_measure_type = st.selectbox(
+            "Type de Mesure", 
+            ["Tous"] + list(MEASURE_TYPES.values()),
+            help="Filtrer par type de mesure (Détection, Réduction, etc.)"
+        )
+        search_term = st.text_input(
+            "Recherche",
+            placeholder="Rechercher un risque...",
+            help="Rechercher dans les risques et leurs descriptions"
+        )
     
     # Statistiques compactes
     st.header("Statistiques", divider='blue')
@@ -228,7 +240,11 @@ with header_col3:
         )
 
 # Onglets principaux
-tab1, tab2, tab3 = st.tabs(["📊 Risques", "🔄 Processus", "🏢 Service"])
+tab1, tab2, tab3 = st.tabs([
+    "📊 Risques | Gestion par famille",
+    "🔄 Processus | Vue par processus",
+    "🏢 Service | Impact par service"
+])
 
 # Contenu de l'onglet Risques
 with tab1:
@@ -238,14 +254,22 @@ with tab1:
             with st.form(key=f"risk_form_{family_key}"):
                 form_col1, form_col2 = st.columns([3, 1])
                 with form_col1:
-                    risk_name = st.text_input("Nom du risque", key=f"name_{family_key}", label_visibility="collapsed")
-                    risk_desc = st.text_input("Description", key=f"desc_{family_key}", label_visibility="collapsed")
+                    risk_name = st.text_input(
+                        "Nom du risque",
+                        placeholder="Ex: Cadeaux dérogeants",
+                        help="Nom court et descriptif du risque"
+                    )
+                    risk_desc = st.text_input(
+                        "Description",
+                        placeholder="Description détaillée du risque...",
+                        help="Expliquez le contexte et les implications"
+                    )
                 with form_col2:
-                    selected_processes = st.multiselect("Processus", PROCESSES, key=f"proc_{family_key}", label_visibility="collapsed")
-                    submitted = st.form_submit_button("Ajouter")
-                    if submitted and risk_name:
-                        add_risk(family_key, risk_name, risk_desc, selected_processes)
-                        st.rerun()
+                    selected_processes = st.multiselect(
+                        "Processus concernés",
+                        PROCESSES,
+                        help="Sélectionnez tous les processus impactés"
+                    )
 
             # Liste des risques existants
             for risk_key, risk_data in family_data["risks"].items():
