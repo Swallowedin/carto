@@ -1,4 +1,13 @@
 import streamlit as st
+
+# Configuration de la page DOIT être le premier appel Streamlit
+st.set_page_config(
+    page_title="Gestion des Risques",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Autres imports
 import pandas as pd
 from datetime import datetime
 import json
@@ -6,12 +15,38 @@ import base64
 import plotly.graph_objects as go
 from collections import defaultdict
 
-# Configuration de la page (une seule fois)
-st.set_page_config(
-    page_title="Gestion des Risques",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# Style CSS
+st.markdown("""
+    <style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .element-container {
+        margin-bottom: 0.5rem;
+    }
+    .stButton>button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    .stMarkdown {
+        margin-bottom: 0.5rem;
+    }
+    div[data-testid="stExpander"] div[role="button"] p {
+        font-size: 0.9rem;
+        margin-bottom: 0rem;
+    }
+    .streamlit-expanderHeader {
+        padding: 0.5rem;
+    }
+    .stTextInput>div>div>input {
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Initialisation des données dans la session state
 if 'risk_families' not in st.session_state:
@@ -42,7 +77,7 @@ MEASURE_TYPES = {
     "T": "Transfert"
 }
 
-# Fonctions de sauvegarde et chargement JSON
+# Fonctions de base
 def save_to_json():
     """Convertit les données en JSON et crée un fichier téléchargeable"""
     json_str = json.dumps(st.session_state.risk_families, ensure_ascii=False, indent=2)
