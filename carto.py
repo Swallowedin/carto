@@ -7,7 +7,11 @@ import plotly.graph_objects as go
 from collections import defaultdict
 
 # Configuration de la page
-st.set_page_config(page_title="Gestion des Risques", layout="wide")
+st.set_page_config(
+    page_title="Gestion des Risques",
+    layout="wide",
+    initial_sidebar_state="collapsed"  # Sidebar repliée par défaut
+)
 
 # Initialisation des données dans la session state
 if 'risk_families' not in st.session_state:
@@ -153,99 +157,78 @@ def export_data():
     df = pd.DataFrame(rows)
     return df.to_csv(index=False, sep=';')
 
-# Titre principal
-st.title("Gestion des Risques par Processus")
+# Titre et configuration initiale
+st.set_page_config(page_title="Gestion des Risques", layout="wide", initial_sidebar_state="collapsed")
 
-# Barre latérale pour les filtres globaux
+# Barre latérale
 with st.sidebar:
-    st.header("Filtres")
-    selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
-    selected_measure_type = st.selectbox("Type de Mesure", ["Tous"] + list(MEASURE_TYPES.values()))
-    search_term = st.text_input("Recherche")
-
-    # Ajout des statistiques dans la barre latérale
-    st.header("Statistiques")
+    with st.container():
+        st.header("Filtres", divider='blue')
+        selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES, label_visibility="collapsed")
+        selected_measure_type = st.selectbox("Type de Mesure", ["Tous"] + list(MEASURE_TYPES.values()), label_visibility="collapsed")
+        search_term = st.text_input("Recherche", placeholder="Rechercher...", label_visibility="collapsed")
+    
+    # Statistiques compactes
+    st.header("Statistiques", divider='blue')
     stats = get_risk_stats()
-    st.metric("Total des risques", stats["total_risks"])
-    st.metric("Total des mesures", stats["total_measures"])
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Risques", stats["total_risks"])
+    with col2:
+        st.metric("Mesures", stats["total_measures"])
 
-# Création des onglets de navigation
-tab1, tab2, tab3 = st.tabs(["Vue par Risques", "Vue par Processus", "Vue par Service"])
-
-# Section Import/Export des données
-st.divider()
-st.subheader("Import/Export des données")
-col1, col2 = st.columns(2)
-
-with col1:
-    uploaded_file = st.file_uploader("Importer des données (CSV)", type="csv")
-    if uploaded_file:
-        if import_data(uploaded_file):
-            st.success("Import réussi")
-
-with col2:
-    if st.button("Exporter les données"):
+# En-tête principale et actions
+header_col1, header_col2, header_col3 = st.columns([2, 1, 1])
+with header_col1:
+    st.header("Gestion des Risques")
+with header_col2:
+    uploaded_file = st.file_uploader("Import CSV", type="csv", label_visibility="collapsed")
+    if uploaded_file and import_data(uploaded_file):
+        st.success("Import réussi")
+with header_col3:
+    if st.button("Exporter CSV", use_container_width=True):
         csv_data = export_data()
         st.download_button(
-            label="Télécharger CSV",
-            data=csv_data,
-            file_name=f"gestion_risques_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
+            "Télécharger",
+            csv_data,
+            f"export_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+            "text/csv"
         )
 
-# Section Sauvegarde/Restauration
-st.divider()
-st.subheader("Sauvegarde des données")
-col3, col4 = st.columns(2)
+# Onglets principaux
+tab1, tab2, tab3 = st.tabs(["📊 Risques", "🔄 Processus", "🏢 Service"])
 
-with col3:
-    st.write("Sauvegarder l'état actuel")
-    st.markdown(save_to_json(), unsafe_allow_html=True)
-
-with col4:
-    st.write("Charger une sauvegarde")
-    json_file = st.file_uploader("Fichier de sauvegarde", type=['json'])
-    if json_file:
-        load_from_json(json_file)
-
-# Vue par Risques (Tab 1)
+# Contenu de l'onglet Risques
 with tab1:
-    st.header("Gestion des Risques par Famille")
-    
     for family_key, family_data in st.session_state.risk_families.items():
-        with st.expander(f"{family_data['name']}", expanded=True):
-            # Formulaire pour ajouter un nouveau risque
+        with st.expander(f"{family_data['name']}", expanded=False):
+            # Formulaire d'ajout de risque
             with st.form(key=f"risk_form_{family_key}"):
-                st.subheader("Nouveau Risque")
-                risk_name = st.text_input("Nom", key=f"name_{family_key}")
-                risk_desc = st.text_area("Description", key=f"desc_{family_key}")
-                selected_processes = st.multiselect("Processus concernés", PROCESSES)
-                
-                if st.form_submit_button("Ajouter"):
-                    add_risk(family_key, risk_name, risk_desc, selected_processes)
-                    st.success("Risque ajouté")
-                    st.rerun()
+                form_col1, form_col2 = st.columns([3, 1])
+                with form_col1:
+                    risk_name = st.text_input("Nom du risque", key=f"name_{family_key}", label_visibility="collapsed")
+                    risk_desc = st.text_input("Description", key=f"desc_{family_key}", label_visibility="collapsed")
+                with form_col2:
+                    selected_processes = st.multiselect("Processus", PROCESSES, key=f"proc_{family_key}", label_visibility="collapsed")
+                    submitted = st.form_submit_button("Ajouter")
+                    if submitted and risk_name:
+                        add_risk(family_key, risk_name, risk_desc, selected_processes)
+                        st.rerun()
 
-            # Affichage des risques existants
+            # Liste des risques existants
             for risk_key, risk_data in family_data["risks"].items():
-                # Filtrage par processus sélectionné
                 if selected_process != "Tous" and selected_process not in risk_data.get("processes", []):
                     continue
-                
-                with st.container():
-                    # En-tête du risque
-                    st.markdown(f"### {risk_key}")
-                    st.write(risk_data["description"])
-                    if risk_data.get("processes"):
-                        st.write("📍 Processus concernés:", ", ".join(risk_data["processes"]))
                     
-                    # Boutons d'action
-                    col1, col2 = st.columns([10, 1])
-                    with col2:
-                        if st.button("🗑️", key=f"delete_{risk_key}"):
-                            if st.warning("Êtes-vous sûr de vouloir supprimer ce risque ?"):
-                                delete_risk(family_key, risk_key)
-                                st.rerun()
+                with st.container():
+                    risk_col1, risk_col2 = st.columns([6, 1])
+                    with risk_col1:
+                        st.markdown(f"**{risk_key}**")
+                        st.caption(risk_data["description"])
+                    with risk_col2:
+                        if st.button("🗑️", key=f"del_{risk_key}"):
+                            delete_risk(family_key, risk_key)
+                            st.rerun()
 
                     # Mesures par type
                     for measure_type, measure_name in MEASURE_TYPES.items():
@@ -474,27 +457,32 @@ with tab3:
 # Configuration des styles et de l'apparence
 st.markdown("""
     <style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .element-container {
+        margin-bottom: 0.5rem;
+    }
     .stButton>button {
-        width: 100%;
-    }
-    .risk-card {
-        padding: 1rem;
-        border: 1px solid #ddd;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .measure-badge {
-        display: inline-block;
         padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        margin-right: 0.5rem;
         font-size: 0.8rem;
     }
-    .stat-card {
-        text-align: center;
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 0.5rem;
+    .stMarkdown {
+        margin-bottom: 0.5rem;
+    }
+    div[data-testid="stExpander"] div[role="button"] p {
+        font-size: 0.9rem;
+        margin-bottom: 0rem;
+    }
+    .streamlit-expanderHeader {
+        padding: 0.5rem;
+    }
+    .stTextInput>div>div>input {
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
     }
     </style>
 """, unsafe_allow_html=True)
