@@ -302,11 +302,16 @@ with tab1:
                             
                             # Ajout d'une nouvelle mesure
                             with st.form(key=f"measure_form_{risk_key}_{measure_type}"):
-                                new_measure = st.text_input(
-                                    "Nouvelle mesure", 
-                                    key=f"new_measure_{risk_key}_{measure_type}"
-                                )
-                                if st.form_submit_button("Ajouter"):
+                                col1, col2 = st.columns([3, 1])
+                                with col1:
+                                    new_measure = st.text_input(
+                                        "Nouvelle mesure", 
+                                        key=f"new_measure_{risk_key}_{measure_type}",
+                                        placeholder=f"Nouvelle mesure de {MEASURE_TYPES[measure_type]}..."
+                                    )
+                                # Ajout du bouton submit
+                                submitted = st.form_submit_button("Ajouter la mesure")
+                                if submitted and new_measure:
                                     add_measure(family_key, risk_key, measure_type, new_measure)
                                     st.rerun()
                             
