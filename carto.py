@@ -34,12 +34,13 @@ MEASURE_TYPES = {
 }
 
 # Fonctions pour la gestion des données
-def add_risk(family_key, risk_name, description):
+def add_risk(family_key, risk_name, description, processes=None):
     if not risk_name:
         return
     risk_key = f"{family_key} - {risk_name}"
     st.session_state.risk_families[family_key]["risks"][risk_key] = {
         "description": description,
+        "processes": processes or [],  # Liste des processus concernés
         "measures": {k: [] for k in MEASURE_TYPES}
     }
 
@@ -123,26 +124,26 @@ with col2:
 # Affichage principal
 for family_key, family_data in st.session_state.risk_families.items():
     with st.expander(f"{family_data['name']}", expanded=True):
-        # Ajout d'un nouveau risque
+        # Dans la section d'ajout de risque
         with st.form(key=f"risk_form_{family_key}"):
             st.subheader("Nouveau Risque")
             risk_name = st.text_input("Nom", key=f"name_{family_key}")
             risk_desc = st.text_area("Description", key=f"desc_{family_key}")
+            selected_processes = st.multiselect("Processus concernés", PROCESSES)
             if st.form_submit_button("Ajouter"):
-                add_risk(family_key, risk_name, risk_desc)
+                add_risk(family_key, risk_name, risk_desc, selected_processes)
                 st.success("Risque ajouté")
                 st.rerun()
 
         # Affichage des risques existants
         for risk_key, risk_data in family_data["risks"].items():
+            # Ne montrer que les risques concernant le processus sélectionné
+            if selected_process != "Tous" and selected_process not in risk_data["processes"]:
+                continue
+    
             st.markdown(f"### {risk_key}")
             st.write(risk_data["description"])
-            
-            col1, col2 = st.columns([10, 1])
-            with col2:
-                if st.button("🗑️", key=f"delete_{risk_key}"):
-                    delete_risk(family_key, risk_key)
-                    st.rerun()
+            st.write("Processus concernés:", ", ".join(risk_data["processes"]))
 
             # Mesures
             for measure_type, measures in risk_data["measures"].items():
