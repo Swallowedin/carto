@@ -189,5 +189,25 @@ for family_key, family_data in st.session_state.risk_families.items():
                             delete_measure(family_key, risk_key, measure_type, i)
                             st.rerun()
 
+            # Mesures
+            for measure_type, measures in risk_data["measures"].items():
+                st.write(f"**{MEASURE_TYPES[measure_type]}**")
+                
+                # Ajout d'une nouvelle mesure
+                new_measure = st.text_input("Nouvelle mesure", key=f"new_measure_{risk_key}_{measure_type}")
+                if st.button("Ajouter", key=f"add_measure_{risk_key}_{measure_type}"):
+                    add_measure(family_key, risk_key, measure_type, new_measure)
+                    st.rerun()
+
+                # Liste des mesures existantes
+                for i, measure in enumerate(measures):
+                    col1, col2 = st.columns([10, 1])
+                    with col1:
+                        st.write(f"- {measure}")
+                    with col2:
+                        if st.button("🗑️", key=f"delete_measure_{risk_key}_{measure_type}_{i}"):
+                            delete_measure(family_key, risk_key, measure_type, i)
+                            st.rerun()
+
 if __name__ == '__main__':
     st.run()
