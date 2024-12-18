@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import json
 from datetime import datetime
 
 # Configuration de la page
