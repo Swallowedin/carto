@@ -192,9 +192,6 @@ def export_data():
     df = pd.DataFrame(rows)
     return df.to_csv(index=False, sep=';')
 
-# Titre et configuration initiale
-st.set_page_config(page_title="Gestion des Risques", layout="wide", initial_sidebar_state="collapsed")
-
 # Barre latérale
 with st.sidebar:
     with st.container():
