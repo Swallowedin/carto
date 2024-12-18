@@ -1,6 +1,29 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import json
+import base64
+from datetime import datetime
+
+def save_to_json():
+    """Convertit les données en JSON et crée un fichier téléchargeable"""
+    json_str = json.dumps(st.session_state.risk_families, ensure_ascii=False, indent=2)
+    b64 = base64.b64encode(json_str.encode()).decode()
+    current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"risk_data_{current_time}.json"
+    href = f'<a href="data:file/json;base64,{b64}" download="{filename}">Télécharger la sauvegarde</a>'
+    return href
+
+def load_from_json(uploaded_file):
+    """Charge les données depuis un fichier JSON"""
+    try:
+        content = uploaded_file.getvalue().decode()
+        data = json.loads(content)
+        st.session_state.risk_families = data
+        st.success("Données chargées avec succès !")
+        st.rerun()
+    except Exception as e:
+        st.error(f"Erreur lors du chargement : {str(e)}")
 
 # Configuration de la page
 st.set_page_config(page_title="Gestion des Risques", layout="wide")
@@ -92,6 +115,21 @@ def export_data():
     
     df = pd.DataFrame(rows)
     return df.to_csv(index=False, sep=';')
+
+# Dans la section Import/Export, après les colonnes existantes
+st.divider()  # Ligne de séparation
+st.subheader("Sauvegarde des données")
+col3, col4 = st.columns(2)
+
+with col3:
+    st.write("Sauvegarder l'état actuel")
+    st.markdown(save_to_json(), unsafe_allow_html=True)
+
+with col4:
+    st.write("Charger une sauvegarde")
+    json_file = st.file_uploader("Fichier de sauvegarde", type=['json'])
+    if json_file:
+        load_from_json(json_file)
 
 # Interface utilisateur
 st.title("Gestion des Risques par Processus")
