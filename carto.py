@@ -217,6 +217,9 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
+    	    if st.button("+", key=f"add_risk_{family_key}"):
+                st.session_state[f"show_risk_form_{family_key}"] = True
+	
             # En-tête avec bouton discret
             st.markdown("""
                 <div style='text-align:right;margin:-0.5rem 0 0.5rem 0'>
