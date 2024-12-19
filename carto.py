@@ -82,7 +82,7 @@ def load_from_json(uploaded_file):
         st.error(f"Erreur lors du chargement : {str(e)}")
 
 def add_risk_family(family_key, family_name):
-    """Ajoute une nouvelle catégorie de risques"""
+    """Ajoute une nouvelle famille de risques"""
     if family_key and family_name:
         st.session_state.risk_families[family_key] = {
             "name": family_name,
@@ -167,7 +167,7 @@ with col2:
 # Formulaire d'ajout de famille
 if st.session_state.get('show_family_form', False):
     with st.form("new_family_form"):
-        st.subheader("Nouvelle Catégorie de Risques")
+        st.subheader("Nouvelle Famille de Risques")
         col1, col2 = st.columns(2)
         with col1:
             family_key = st.text_input("Code", placeholder="Ex: FIN")
@@ -188,11 +188,10 @@ if st.session_state.get('show_family_form', False):
 
 # Onglets principaux
 tab1, tab2, tab3 = st.tabs([
-    "📊 Risques | Vue par risques",
+    "📊 Risques | Gestion par famille",
     "🔄 Processus | Vue par processus",
     "🏢 Service | Impact par service"
 ])
-
 
 # Tab 1: Gestion par famille
 with tab1:
@@ -208,17 +207,12 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # En-tête avec bouton discret
-            st.markdown("""
-                <div style='text-align:right;margin:-0.5rem 0 0.5rem 0'>
-                    <span style='color:#666;font-size:0.8em;cursor:pointer;border:1px solid #ddd;padding:2px 6px;border-radius:3px;background:#f8f9fa'>
-                        + Ajouter un risque
-                    </span>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button("", key=f"add_risk_{family_key}", help="Ajouter un risque"):
-                st.session_state[f"show_risk_form_{family_key}"] = True
-		
+            # Remplacer le markup HTML et le bouton invisible par un unique bouton Streamlit
+            col1, col2 = st.columns([10, 2])
+            with col2:
+                if st.button("➕ Ajouter un risque", key=f"add_risk_{family_key}", type="secondary", use_container_width=True):
+                    st.session_state[f"show_risk_form_{family_key}"] = True
+
             # Formulaire d'ajout de risque
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
@@ -229,9 +223,12 @@ with tab1:
                     col1, col2 = st.columns(2)
                     with col1:
                         if st.form_submit_button("Ajouter"):
-                            add_risk(family_key, risk_name, risk_desc, selected_processes)
-                            st.session_state[f"show_risk_form_{family_key}"] = False
-                            st.rerun()
+                            if risk_name:  # Vérification que le nom n'est pas vide
+                                add_risk(family_key, risk_name, risk_desc, selected_processes)
+                                st.session_state[f"show_risk_form_{family_key}"] = False
+                                st.rerun()
+                            else:
+                                st.error("Le nom du risque est requis")
                     with col2:
                         if st.form_submit_button("Annuler"):
                             st.session_state[f"show_risk_form_{family_key}"] = False
