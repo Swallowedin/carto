@@ -15,44 +15,34 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Réduction globale des marges */
-    .block-container {padding: 0.5rem 1rem !important;}
+    /* Masquer le bandeau Streamlit */
+    header[data-testid="stHeader"] {display: none !important;}
+    
+    /* Réduction maximale des marges */
+    .block-container {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Réduire l'espace du header principal */
+    .main .block-container:first-child {margin-top: -4rem !important;}
+    
+    /* Réduire les tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 1rem;
+        margin-top: 0;
+        padding-bottom: 0;
+    }
+    .stTabs [data-baseweb="tab"] {padding: 0.25rem 0;}
     
     /* Inputs plus compacts */
-    .stTextInput input {
-        padding: 0.3rem 0.5rem !important;
+    .stTextInput input, .stSelectbox > div > div {
+        min-height: 0;
+        padding: 0.2rem 0.4rem !important;
         line-height: 1.2 !important;
+        font-size: 0.8rem !important;
     }
-    .stSelectbox > div {
-        line-height: 1.2 !important;
-    }
-    .stSelectbox > div > div {
-        padding: 0.3rem 0.5rem !important;
-    }
-    
-    /* Headings plus discrets */
-    h1, h2, h3 {font-size: 1rem !important; margin: 0 !important;}
-    
-    /* Meilleure séparation visuelle */
-    .risk-item {
-        border-left: 3px solid #eee;
-        padding-left: 0.5rem;
-        margin: 0.2rem 0;
-    }
-    
-    /* Expander plus compact */
-    .streamlit-expanderHeader {padding: 0.3rem !important;}
-    
-    /* Boutons discrets */
-    .stButton button {
-        height: 1.5rem !important;
-        padding: 0 0.5rem !important;
-        font-size: 0.7rem !important;
-    }
-    
-    /* Réduction des espaces verticaux */
-    .element-container {margin-bottom: 0.2rem !important;}
-    p {margin: 0 !important; line-height: 1.3 !important;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -170,17 +160,17 @@ def get_risks_by_process(process_name):
                 })
     return process_risks
 
-# Interface principale
-header_col1, header_col2, header_col3 = st.columns([2, 1, 1])
-with header_col1:
-    st.header("Gestion des Risques")
-with header_col2:
-    uploaded_file = st.file_uploader("Import CSV", type="csv", label_visibility="collapsed")
-    if uploaded_file and import_data(uploaded_file):
-        st.success("Import réussi")
-with header_col3:
-    if st.button("➕ Nouvelle Famille", use_container_width=True):
-        st.session_state.show_family_form = True
+# Interface principale plus compacte
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.markdown("### Gestion des Risques")
+with col2:
+    upload_col, btn_col = st.columns([1, 1])
+    with upload_col:
+        uploaded_file = st.file_uploader("", type="csv", label_visibility="collapsed")
+    with btn_col:
+        if st.button("+ Famille", use_container_width=True):
+            st.session_state.show_family_form = True
 
 # Formulaire d'ajout de famille
 if st.session_state.get('show_family_form', False):
