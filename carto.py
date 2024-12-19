@@ -289,57 +289,43 @@ with tab1:
                                                     delete_measure(family_key, risk_key, m_type, i)
                                                     st.rerun()
 
-                    # Mode affichage compact
+# Mode affichage compact
                     else:
-                        # Conteneur avec bordure légère et padding minimal
-                        st.markdown("""
-                            <style>
-                            .compact-risk {
-                                border-left: 2px solid #e6e6e6;
-                                padding-left: 8px;
-                                margin: 4px 0;
-                            }
-                            </style>
-                        """, unsafe_allow_html=True)
-                        
+                        # Container avec style compact
                         with st.container():
-                            st.markdown('<div class="compact-risk">', unsafe_allow_html=True)
-                            # En-tête compact
-                            cols = st.columns([12, 1, 1])
+                            # En-tête sur une ligne avec tout
+                            cols = st.columns([10, 1, 1])
                             with cols[0]:
-                                # Ligne 1: Nom du risque et compteurs de mesures
+                                # Titre et mesures sur la même ligne
                                 measure_counts = {m_type: len(measures) for m_type, measures in risk_data["measures"].items()}
-                                measure_summary = " • ".join([f"{MEASURE_TYPES[t]}: {c}" for t, c in measure_counts.items() if c > 0])
-                                st.markdown(f"""
-                                    **{risk_key.split(' - ')[1]}** 
-                                    <span style='color: #666; font-size: 0.8em;'>({measure_summary})</span>
-                                """, unsafe_allow_html=True)
+                                measure_badges = " ".join([
+                                    f"""<span style='background-color: #f0f2f6; padding: 1px 5px; border-radius: 3px; font-size: 0.7em; margin-right: 3px;'>
+                                        {m_type}: {count}</span>"""
+                                    for m_type, count in measure_counts.items() if count > 0
+                                ])
                                 
-                                # Ligne 2: Description courte et processus
-                                desc_short = risk_data["description"][:100] + "..." if len(risk_data["description"]) > 100 else risk_data["description"]
-                                process_list = ", ".join(risk_data["processes"])
                                 st.markdown(f"""
-                                    <span style='color: #666; font-size: 0.8em;'>{desc_short}</span><br>
-                                    <span style='color: #999; font-size: 0.7em;'>{process_list}</span>
+                                    <div style='margin: 2px 0;'>
+                                        <span style='font-weight: 500;'>{risk_key.split(' - ')[1]}</span>
+                                        <span style='margin-left: 8px; color: #666;'>{measure_badges}</span>
+                                    </div>
+                                    <div style='font-size: 0.8em; color: #666; margin-top: -3px;'>{risk_data["description"][:150]}...</div>
+                                    <div style='font-size: 0.7em; color: #888;'>{", ".join(risk_data["processes"])}</div>
                                 """, unsafe_allow_html=True)
                             
+                            # Boutons d'action plus discrets
                             with cols[1]:
                                 st.markdown(
-                                    f"""<span style='font-size: 0.7em;'>📝</span>""", 
+                                    """<span style='font-size: 0.7em; color: #666;'>📝</span>""", 
                                     unsafe_allow_html=True
                                 )
-                                if st.button("", key=f"edit_{risk_key}", help="Éditer"):
-                                    st.session_state[f"edit_risk_{risk_key}"] = True
-                                    st.rerun()
+                                st.button("", key=f"edit_{risk_key}", help="Éditer")
                             with cols[2]:
                                 st.markdown(
-                                    f"""<span style='font-size: 0.7em;'>🗑️</span>""", 
+                                    """<span style='font-size: 0.7em; color: #666;'>×</span>""", 
                                     unsafe_allow_html=True
                                 )
-                                if st.button("", key=f"del_{risk_key}", help="Supprimer"):
-                                    delete_risk(family_key, risk_key)
-                                    st.rerun()
-                            st.markdown('</div>', unsafe_allow_html=True)
+                                st.button("", key=f"del_{risk_key}", help="Supprimer")
 							
 with tab2:
     st.header("Vue par Processus")
