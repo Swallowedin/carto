@@ -38,13 +38,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-    /* Réduire l'espace autour du bouton */
-    div[data-testid="stExpander"] > div:first-child {
-        margin-bottom: 0 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # Initialisation session state
 if 'risk_families' not in st.session_state:
     st.session_state.risk_families = {}
