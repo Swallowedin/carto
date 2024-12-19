@@ -211,12 +211,12 @@ with tab1:
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
             # En-tête avec bouton discret
-            cols = st.columns([20, 1])
-            with cols[1]:
-                if st.button("+", key=f"add_risk_btn_{family_key}", help="Ajouter un risque"):
-                    st.session_state[f"show_risk_form_{family_key}"] = True
+            st.markdown("""
+                <div style='text-align:right;margin:-0.5rem 0 0.5rem 0'>
+                    <a href="#" style='color:#666;font-size:0.8em;cursor:pointer;border:1px solid #ddd;padding:2px 6px;border-radius:3px;background:#f8f9fa;text-decoration:none;'>+ Ajouter un risque</a>
+                </div>
+                """, unsafe_allow_html=True)
 
-            # Formulaire d'ajout de risque (uniquement si le bouton a été cliqué)
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
                     risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
