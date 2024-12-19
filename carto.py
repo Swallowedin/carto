@@ -15,25 +15,25 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Bouton d'ajout plus petit et discret */
-    button[aria-label="+"]:not(.streamlit-expanderHeader) {
+    /* Ciblage plus précis du bouton d'ajout */
+    div[data-testid="stExpander"] button:last-child,
+    div[data-testid="stExpander"] [aria-label="+"] {
         padding: 0.1rem 0.3rem !important;
-        height: auto !important;
+        min-width: 20px !important;
+        width: 20px !important;
+        height: 20px !important;
         line-height: 1 !important;
         font-size: 0.7rem !important;
         border: 1px solid #ddd !important;
         background: transparent !important;
         color: #666 !important;
+        float: right !important;
+        margin-top: -2px !important;
     }
-    
-    /* Ajustement de l'espacement des expanders */
-    .streamlit-expanderContent {
-        border-top: 1px solid #eee !important;
-        padding-top: 0.3rem !important;
-    }
-    .streamlit-expanderHeader {
-        border: none !important;
-        background: transparent !important;
+
+    /* Réduire l'espace autour du bouton */
+    div[data-testid="stExpander"] > div:first-child {
+        margin-bottom: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
