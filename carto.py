@@ -215,73 +215,60 @@ with tab1:
                             delete_risk(family_key, risk_key)
                             st.rerun()
 
-                    # Affichage et gestion des mesures
-                    for measure_type, measure_name in MEASURE_TYPES.items():
-                        if selected_measure_type != "Tous" and measure_name != selected_measure_type:
-                            continue
+[Les deux premières parties du code restent identiques jusqu'à la gestion des mesures dans tab1]
 
-                        measures = risk_data["measures"][measure_type]
-                        if measures or st.session_state.get(f"add_measure_{risk_key}_{measure_type}", False):
-                            with st.expander(f"{measure_name} ({len(measures)})", expanded=False):
-                                # Formulaire d'ajout de mesure
-                                col1, col2 = st.columns([4, 1])
-                                with col1:
-                                    new_measure = st.text_input(
-                                        "",
-                                        key=f"new_measure_{risk_key}_{measure_type}",
-                                        placeholder="Nouvelle mesure..."
+                    # Modification de la gestion des mesures pour un risque
+                    with st.expander("Ajouter une mesure", expanded=False):
+                        with st.form(key=f"measure_form_{risk_key}"):
+                            new_measure = st.text_area(
+                                "Description de la mesure",
+                                key=f"measure_desc_{risk_key}",
+                                placeholder="Décrivez la mesure...",
+                                height=100
+                            )
+                            
+                            # Cases à cocher pour les types de mesure
+                            st.write("Type de mesure :")
+                            cols = st.columns(5)
+                            measure_types_selected = {}
+                            for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+                                with cols[i]:
+                                    measure_types_selected[m_type] = st.checkbox(
+                                        m_name,
+                                        key=f"measure_type_{risk_key}_{m_type}"
                                     )
+                            
+                            if st.form_submit_button("Ajouter la mesure"):
+                                if new_measure:
+                                    for m_type, selected in measure_types_selected.items():
+                                        if selected:
+                                            add_measure(family_key, risk_key, m_type, new_measure)
+                                    st.success("Mesure ajoutée")
+                                    st.rerun()
+                    
+                    # Affichage des mesures existantes
+                    if any(risk_data["measures"].values()):
+                        with st.expander("Mesures existantes", expanded=True):
+                            # Création d'un dictionnaire inversé pour regrouper les mesures identiques
+                            measures_by_description = defaultdict(list)
+                            for m_type, measures in risk_data["measures"].items():
+                                for measure in measures:
+                                    measures_by_description[measure].append(m_type)
+                            
+                            # Affichage des mesures avec leurs types
+                            for measure, types in measures_by_description.items():
+                                col1, col2 = st.columns([5, 1])
+                                with col1:
+                                    st.write(f"📝 {measure}")
+                                    st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
                                 with col2:
-                                    if st.button("➕", key=f"add_measure_{risk_key}_{measure_type}"):
-                                        add_measure(family_key, risk_key, measure_type, new_measure)
+                                    if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
+                                        # Suppression de la mesure de tous les types associés
+                                        for m_type in types:
+                                            measures = risk_data["measures"][m_type]
+                                            if measure in measures:
+                                                measures.remove(measure)
                                         st.rerun()
-
-                                # Liste des mesures existantes
-                                for i, measure in enumerate(measures):
-                                    cols = st.columns([10, 1])
-                                    with cols[0]:
-                                        st.write(f"- {measure}")
-                                    with cols[1]:
-                                        if st.button("🗑️", key=f"del_measure_{risk_key}_{measure_type}_{i}"):
-                                            delete_measure(family_key, risk_key, measure_type, i)
-                                            st.rerun()
-
-# Fonctions pour les vues spécialisées
-def get_risks_by_process(process_name):
-    """Récupère tous les risques associés à un processus"""
-    process_risks = []
-    for family_key, family_data in st.session_state.risk_families.items():
-        for risk_key, risk_data in family_data["risks"].items():
-            if process_name in risk_data.get("processes", []):
-                process_risks.append({
-                    "family": family_key,
-                    "risk": risk_key,
-                    "description": risk_data["description"],
-                    "measures": risk_data["measures"]
-                })
-    return process_risks
-
-def get_process_coverage_stats(process_name):
-    """Calcule les statistiques de couverture pour un processus"""
-    stats = {
-        "total_risks": 0,
-        "measures_by_type": defaultdict(int),
-        "risks_by_family": defaultdict(int),
-        "total_measures": 0
-    }
-    
-    for family_key, family_data in st.session_state.risk_families.items():
-        for risk_key, risk_data in family_data["risks"].items():
-            if process_name in risk_data.get("processes", []):
-                stats["total_risks"] += 1
-                stats["risks_by_family"][family_key] += 1
-                
-                for measure_type, measures in risk_data["measures"].items():
-                    measure_count = len(measures)
-                    stats["measures_by_type"][measure_type] += measure_count
-                    stats["total_measures"] += measure_count
-    
-    return stats
 
 # Tab 2: Vue par processus
 with tab2:
