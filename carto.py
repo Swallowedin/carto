@@ -13,30 +13,46 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Style CSS simplifié
 st.markdown("""
     <style>
     /* Réduction globale des marges */
-    .block-container {padding-top: 0 !important; padding-bottom: 0 !important;}
-    .element-container {margin: 0 !important;}
+    .block-container {padding: 0.5rem 1rem !important;}
     
-    /* Réduction des espaces dans les selectbox */
-    .stSelectbox {margin: 0 !important;}
-    .stSelectbox > div > div {min-height: 0 !important;}
+    /* Inputs plus compacts */
+    .stTextInput input {
+        padding: 0.3rem 0.5rem !important;
+        line-height: 1.2 !important;
+    }
+    .stSelectbox > div {
+        line-height: 1.2 !important;
+    }
+    .stSelectbox > div > div {
+        padding: 0.3rem 0.5rem !important;
+    }
     
-    /* Boutons plus compacts */
-    button[kind="secondary"] {
-        padding: 0 !important;
-        width: 24px !important;
-        height: 24px !important;
+    /* Headings plus discrets */
+    h1, h2, h3 {font-size: 1rem !important; margin: 0 !important;}
+    
+    /* Meilleure séparation visuelle */
+    .risk-item {
+        border-left: 3px solid #eee;
+        padding-left: 0.5rem;
+        margin: 0.2rem 0;
     }
     
     /* Expander plus compact */
-    .streamlit-expanderHeader {padding: 0.2rem !important;}
-    .streamlit-expanderHeader p {margin: 0 !important;}
+    .streamlit-expanderHeader {padding: 0.3rem !important;}
     
-    /* Textes plus compacts */
-    p {margin: 0 !important; padding: 0 !important;}
+    /* Boutons discrets */
+    .stButton button {
+        height: 1.5rem !important;
+        padding: 0 0.5rem !important;
+        font-size: 0.7rem !important;
+    }
+    
+    /* Réduction des espaces verticaux */
+    .element-container {margin-bottom: 0.2rem !important;}
+    p {margin: 0 !important; line-height: 1.3 !important;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -300,22 +316,20 @@ with tab1:
                             cols = st.columns([15, 1, 1])
                             with cols[0]:
                                 # Conteneur principal avec le titre et les badges
-                                st.markdown(
-                                    f"""<div style="margin:1px 0">
-                                        <div style="display:flex;align-items:center;gap:8px">
-                                            <span style="font-size:0.9em">{risk_key.split(' - ')[1]}</span>
-                                            <div style="display:flex;gap:4px">
-                                                {' '.join([
-                                                    f'<span style="background:#f3f4f6;padding:1px 4px;border-radius:2px;font-size:0.7em">{t}:{len(m)}</span>'
-                                                    for t, m in risk_data["measures"].items() if len(m) > 0
-                                                ])}
-                                            </div>
-                                        </div>
-                                        <div style="font-size:0.75em;color:#666;margin:1px 0">{risk_data["description"][:100]}</div>
-                                        <div style="font-size:0.7em;color:#888">{', '.join(risk_data["processes"])}</div>
-                                    </div>""",
-                                    unsafe_allow_html=True
-                                )
+                                st.markdown(f"""
+									<div class="risk-item">
+										<div style="display:flex;align-items:center;gap:0.5rem">
+											<div style="flex-grow:1;font-size:0.9rem">{risk_key.split(' - ')[1]}</div>
+											<div style="display:flex;gap:0.25rem">
+												{' '.join([
+													f'<span style="background:#f5f5f5;padding:0 0.25rem;border-radius:2px;font-size:0.7rem">{t}:{c}</span>'
+													for t, c in measure_counts.items() if c > 0
+												])}
+											</div>
+										</div>
+										<div style="font-size:0.8rem;color:#666;margin-top:0.1rem">{risk_data["description"][:100]}</div>
+									</div>
+								""", unsafe_allow_html=True)
                             
                             # Boutons Streamlit compacts
                             with cols[1]:
