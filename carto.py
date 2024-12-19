@@ -225,18 +225,25 @@ with tab1:
                 # Bouton d'ajout de mesure
                 with cols[-1]:
                     if st.button("＋", key=f"add_measure_{family_key}"):
-                        if measure_text and any(measure_types_selected.values()):
-                            if not risk_name:  # On crée d'abord le risque s'il n'existe pas
+                        if measure_text and any(measure_types_selected.values()) and risk_name:
+                            # Vérifier si le risque existe déjà, sinon le créer
+                            risk_key = f"{family_key} - {risk_name}"
+                            if risk_key not in st.session_state.risk_families[family_key]["risks"]:
                                 add_risk(family_key, risk_name, risk_desc, selected_processes)
+                            
+                            # Ajouter la mesure
                             for m_type, selected in measure_types_selected.items():
                                 if selected:
-                                    add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
+                                    add_measure(family_key, risk_key, m_type, measure_text)
+                            
                             # Reset form fields
                             st.session_state[f"measure_text_{family_key}"] = ""
                             for m_type in MEASURE_TYPES:
                                 st.session_state[f"measure_type_{family_key}_{m_type}"] = False
                             st.rerun()
-                
+                        elif not risk_name:
+                            st.error("Veuillez d'abord saisir un nom de risque")
+
                 # Boutons de validation/annulation du risque
                 col1, col2 = st.columns([1, 4])
                 with col1:
