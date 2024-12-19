@@ -82,7 +82,7 @@ def load_from_json(uploaded_file):
         st.error(f"Erreur lors du chargement : {str(e)}")
 
 def add_risk_family(family_key, family_name):
-    """Ajoute une nouvelle famille de risques"""
+    """Ajoute une nouvelle catégorie de risques"""
     if family_key and family_name:
         st.session_state.risk_families[family_key] = {
             "name": family_name,
@@ -164,18 +164,10 @@ with col2:
         if st.button("+ Famille", use_container_width=True):
             st.session_state.show_family_form = True
 
-
-# Onglets principaux
-tab1, tab2, tab3 = st.tabs([
-    "📊 Risques | Gestion par famille",
-    "🔄 Processus | Vue par processus",
-    "🏢 Service | Impact par service"
-])
-
 # Formulaire d'ajout de famille
 if st.session_state.get('show_family_form', False):
     with st.form("new_family_form"):
-        st.subheader("Nouvelle Famille de Risques")
+        st.subheader("Nouvelle Catégorie de Risques")
         col1, col2 = st.columns(2)
         with col1:
             family_key = st.text_input("Code", placeholder="Ex: FIN")
@@ -193,6 +185,14 @@ if st.session_state.get('show_family_form', False):
             if st.form_submit_button("Annuler"):
                 st.session_state.show_family_form = False
                 st.rerun()
+
+# Onglets principaux
+tab1, tab2, tab3 = st.tabs([
+    "📊 Risques | Vue par risques",
+    "🔄 Processus | Vue par processus",
+    "🏢 Service | Impact par service"
+])
+
 
 # Tab 1: Gestion par famille
 with tab1:
