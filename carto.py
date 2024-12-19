@@ -201,6 +201,8 @@ with tab1:
         with st.expander(f"📁 {family_data['name']}", expanded=False):
             cols = st.columns([20, 1])
             with cols[1]:
+                if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
+                    st.session_state[f"show_risk_form_{family_key}"] = True
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}", clear_on_submit=False):
                     # Formulaire principal
