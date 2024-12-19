@@ -16,22 +16,34 @@ st.set_page_config(
 # Style CSS simplifié
 st.markdown("""
     <style>
-    .block-container {padding: 1rem;}
-    .element-container {margin-bottom: 0.5rem;}
-    .risk-family-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem;
+    /* Réduction des espaces globaux */
+    .block-container {padding: 0.5rem !important;}
+    .element-container {margin-bottom: 0.1rem !important;}
+    
+    /* Style pour les risques */
+    .risk-item {
+        padding: 2px 4px;
+        border-left: 2px solid #eee;
+        margin: 2px 0;
     }
-    .compact-button {padding: 0.25rem !important;}
+    
+    /* Réduction de la taille des select */
+    .stSelectbox div {min-height: 0; padding-top: 0; padding-bottom: 0;}
+    
+    /* Boutons plus compacts */
     .stButton>button {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
+        padding: 0 4px !important;
+        height: 20px !important;
+        line-height: 20px !important;
+        font-size: 12px !important;
     }
-    div[data-testid="stExpander"] div[role="button"] p {
-        font-size: 0.9rem;
-        margin-bottom: 0rem;
+    
+    /* Réduction des marges pour les expanders */
+    .streamlit-expanderHeader {
+        padding: 0.2rem !important;
+    }
+    div[data-testid="stExpander"] div[role="button"] {
+        padding: 0.2rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -291,41 +303,30 @@ with tab1:
 
 # Mode affichage compact
                     else:
-                        # Container avec style compact
-                        with st.container():
-                            # En-tête sur une ligne avec tout
-                            cols = st.columns([10, 1, 1])
-                            with cols[0]:
-                                # Titre et mesures sur la même ligne
-                                measure_counts = {m_type: len(measures) for m_type, measures in risk_data["measures"].items()}
-                                measure_badges = " ".join([
-                                    f"""<span style='background-color: #f0f2f6; padding: 1px 5px; border-radius: 3px; font-size: 0.7em; margin-right: 3px;'>
-                                        {m_type}: {count}</span>"""
-                                    for m_type, count in measure_counts.items() if count > 0
-                                ])
-                                
-                                st.markdown(f"""
-                                    <div style='margin: 2px 0;'>
-                                        <span style='font-weight: 500;'>{risk_key.split(' - ')[1]}</span>
-                                        <span style='margin-left: 8px; color: #666;'>{measure_badges}</span>
+                        st.markdown(
+                            f"""
+                            <div class="risk-item">
+                                <div style="display:flex;justify-content:space-between;align-items:center">
+                                    <div style="flex-grow:1">
+                                        <span style="font-weight:500;font-size:0.9em">{risk_key.split(' - ')[1]}</span>
+                                        <span style="color:#666;font-size:0.7em;margin-left:8px">
+                                            {' '.join([
+                                                f'<span style="background:#f0f2f6;padding:0 3px;border-radius:2px;margin-right:2px">{t}:{len(m)}</span>'
+                                                for t, m in risk_data["measures"].items() if len(m) > 0
+                                            ])}
+                                        </span>
                                     </div>
-                                    <div style='font-size: 0.8em; color: #666; margin-top: -3px;'>{risk_data["description"][:150]}...</div>
-                                    <div style='font-size: 0.7em; color: #888;'>{", ".join(risk_data["processes"])}</div>
-                                """, unsafe_allow_html=True)
-                            
-                            # Boutons d'action plus discrets
-                            with cols[1]:
-                                st.markdown(
-                                    """<span style='font-size: 0.7em; color: #666;'>📝</span>""", 
-                                    unsafe_allow_html=True
-                                )
-                                st.button("", key=f"edit_{risk_key}", help="Éditer")
-                            with cols[2]:
-                                st.markdown(
-                                    """<span style='font-size: 0.7em; color: #666;'>×</span>""", 
-                                    unsafe_allow_html=True
-                                )
-                                st.button("", key=f"del_{risk_key}", help="Supprimer")
+                                    <div style="display:flex;gap:4px;align-items:center">
+                                        <button onclick="alert('edit')" style="border:none;background:none;padding:0;font-size:10px;color:#666">📝</button>
+                                        <button onclick="alert('delete')" style="border:none;background:none;padding:0;font-size:10px;color:#666">×</button>
+                                    </div>
+                                </div>
+                                <div style="font-size:0.75em;color:#666;margin-top:1px">{risk_data["description"][:100]}...</div>
+                                <div style="font-size:0.7em;color:#888">{', '.join(risk_data["processes"])}</div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
 							
 with tab2:
     st.header("Vue par Processus")
