@@ -15,33 +15,25 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Masquer le bandeau Streamlit */
-    header[data-testid="stHeader"] {display: none !important;}
-    
-    /* Réduction maximale des marges */
-    .block-container {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
+    /* Bouton d'ajout plus petit et discret */
+    button[aria-label="+"]:not(.streamlit-expanderHeader) {
+        padding: 0.1rem 0.3rem !important;
+        height: auto !important;
+        line-height: 1 !important;
+        font-size: 0.7rem !important;
+        border: 1px solid #ddd !important;
+        background: transparent !important;
+        color: #666 !important;
     }
     
-    /* Réduire l'espace du header principal */
-    .main .block-container:first-child {margin-top: -4rem !important;}
-    
-    /* Réduire les tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 1rem;
-        margin-top: 0;
-        padding-bottom: 0;
+    /* Ajustement de l'espacement des expanders */
+    .streamlit-expanderContent {
+        border-top: 1px solid #eee !important;
+        padding-top: 0.3rem !important;
     }
-    .stTabs [data-baseweb="tab"] {padding: 0.25rem 0;}
-    
-    /* Inputs plus compacts */
-    .stTextInput input, .stSelectbox > div > div {
-        min-height: 0;
-        padding: 0.2rem 0.4rem !important;
-        line-height: 1.2 !important;
-        font-size: 0.8rem !important;
+    .streamlit-expanderHeader {
+        border: none !important;
+        background: transparent !important;
     }
     </style>
 """, unsafe_allow_html=True)
