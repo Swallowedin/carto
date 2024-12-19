@@ -164,6 +164,14 @@ with col2:
         if st.button("+ Famille", use_container_width=True):
             st.session_state.show_family_form = True
 
+
+# Onglets principaux
+tab1, tab2, tab3 = st.tabs([
+    "📊 Risques | Gestion par famille",
+    "🔄 Processus | Vue par processus",
+    "🏢 Service | Impact par service"
+])
+
 # Formulaire d'ajout de famille
 if st.session_state.get('show_family_form', False):
     with st.form("new_family_form"):
@@ -185,13 +193,6 @@ if st.session_state.get('show_family_form', False):
             if st.form_submit_button("Annuler"):
                 st.session_state.show_family_form = False
                 st.rerun()
-
-# Onglets principaux
-tab1, tab2, tab3 = st.tabs([
-    "📊 Risques | Gestion par famille",
-    "🔄 Processus | Vue par processus",
-    "🏢 Service | Impact par service"
-])
 
 # Tab 1: Gestion par famille
 with tab1:
