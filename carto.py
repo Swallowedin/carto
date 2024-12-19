@@ -15,22 +15,25 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    .discrete-add-button {
-        color: #666;
-        font-size: 0.8em;
-        cursor: pointer;
-        border: 1px solid #ddd;
-        padding: 2px 6px;
-        border-radius: 3px;
-        background: #f8f9fa;
-        text-decoration: none;
-        float: right;
-        margin-top: -0.5rem;
-        margin-bottom: 0.5rem;
+    /* Ciblage plus précis du bouton d'ajout */
+    div[data-testid="stExpander"] button:last-child,
+    div[data-testid="stExpander"] [aria-label="+"] {
+        padding: 0.1rem 0.3rem !important;
+        min-width: 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+        line-height: 1 !important;
+        font-size: 0.7rem !important;
+        border: 1px solid #ddd !important;
+        background: transparent !important;
+        color: #666 !important;
+        float: right !important;
+        margin-top: -2px !important;
     }
-    .discrete-add-button:hover {
-        background: #e9ecef;
-        text-decoration: none;
+
+    /* Réduire l'espace autour du bouton */
+    div[data-testid="stExpander"] > div:first-child {
+        margin-bottom: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -157,9 +160,6 @@ with col2:
     upload_col, btn_col = st.columns([1, 1])
     with upload_col:
         uploaded_file = st.file_uploader("", type="csv", label_visibility="collapsed")
-    with btn_col:
-        if st.button("+ Famille", use_container_width=True):
-            st.session_state.show_family_form = True
 
 # Formulaire d'ajout de famille
 if st.session_state.get('show_family_form', False):
@@ -192,6 +192,10 @@ tab1, tab2, tab3 = st.tabs([
 
 # Tab 1: Gestion par famille
 with tab1:
+
+    if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
+        st.session_state.show_family_form = True
+		
     # Barre de recherche et filtres
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
@@ -200,19 +204,18 @@ with tab1:
         selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
     with col3:
         selected_measure_type = st.selectbox("Type de mesure", ["Tous"] + list(MEASURE_TYPES.values()))
+		
 
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # Bouton discret unique
-            if st.markdown(f"""
-                <div style='text-align:right'>
-                    <a href="#" class="discrete-add-button" data-key="{family_key}">+ Ajouter un risque</a>
-                </div>
-                """, unsafe_allow_html=True):
-                st.session_state[f"show_risk_form_{family_key}"] = True
+            # En-tête avec bouton discret
+            cols = st.columns([20, 1])
+            with cols[1]:
+                if st.button("+", key=f"add_risk_btn_{family_key}", help="Ajouter un risque"):
+                    st.session_state[f"show_risk_form_{family_key}"] = True
 
-            # Formulaire d'ajout de risque
+            # Formulaire d'ajout de risque (uniquement si le bouton a été cliqué)
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
                     risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
