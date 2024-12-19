@@ -159,127 +159,123 @@ tab1, tab2, tab3 = st.tabs([
 
 
 with tab1:
-    # Bouton pour ajouter une nouvelle famille
-    if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
-        st.session_state.show_family_form = True
-    
-    # Formulaire d'ajout de famille
-    if st.session_state.get('show_family_form', False):
-        with st.form("new_family_form"):
-            st.subheader("Nouvelle Famille de Risques")
-            col1, col2 = st.columns(2)
-            with col1:
-                family_key = st.text_input("Code", placeholder="Ex: FIN")
-            with col2:
-                family_name = st.text_input("Nom", placeholder="Ex: Finance")
-            
-            col3, col4 = st.columns(2)
-            with col3:
-                if st.form_submit_button("Ajouter"):
-                    if family_key and family_name:
-                        add_risk_family(family_key, family_name)
-                        st.session_state.show_family_form = False
-                        st.rerun()
-            with col4:
-                if st.form_submit_button("Annuler"):
-                    st.session_state.show_family_form = False
-                    st.rerun()
-    
-    # Barre de recherche et filtres
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        search_term = st.text_input("🔍", placeholder="Rechercher...")
-    with col2:
-        selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
-    with col3:
-        selected_measure_type = st.selectbox("Type de mesure", ["Tous"] + list(MEASURE_TYPES.values()))
+   # Bouton pour ajouter une nouvelle famille
+   if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
+       st.session_state.show_family_form = True
+   
+   # Formulaire d'ajout de famille
+   if st.session_state.get('show_family_form', False):
+       with st.form("new_family_form"):
+           st.subheader("Nouvelle Famille de Risques")
+           col1, col2 = st.columns(2)
+           with col1:
+               family_key = st.text_input("Code", placeholder="Ex: FIN")
+           with col2:
+               family_name = st.text_input("Nom", placeholder="Ex: Finance")
+           
+           col3, col4 = st.columns(2)
+           with col3:
+               if st.form_submit_button("Ajouter"):
+                   if family_key and family_name:
+                       add_risk_family(family_key, family_name)
+                       st.session_state.show_family_form = False
+                       st.rerun()
+           with col4:
+               if st.form_submit_button("Annuler"):
+                   st.session_state.show_family_form = False
+                   st.rerun()
+   
+   # Barre de recherche et filtres
+   col1, col2, col3 = st.columns([2, 1, 1])
+   with col1:
+       search_term = st.text_input("🔍", placeholder="Rechercher...")
+   with col2:
+       selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
+   with col3:
+       selected_measure_type = st.selectbox("Type de mesure", ["Tous"] + list(MEASURE_TYPES.values()))
 
-    # Affichage des familles de risques
-    for family_key, family_data in st.session_state.risk_families.items():
-        with st.expander(f"📁 {family_data['name']}", expanded=False):
-            cols = st.columns([20, 1])
-            with cols[1]:
-                if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
-                    st.session_state[f"show_risk_form_{family_key}"] = True
-            
-            if st.session_state.get(f"show_risk_form_{family_key}", False):
-                # Zone d'édition du risque
-                col1, col2 = st.columns([2, 1])
-                with col1:
-                    risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
-                    risk_desc = st.text_area("Description", key=f"risk_desc_{family_key}", height=100)
-                with col2:
-                    selected_processes = st.multiselect("Processus concernés", PROCESSES)
-                
-                # Section des mesures
-                st.markdown("### Mesures")
-                measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
-                cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
-                measure_types_selected = {}
-                
-                # Selection des types de mesures
-                for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
-                    with cols[i]:
-                        measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
-                
-                # Bouton d'ajout de mesure
-                with cols[-1]:
-                    if st.button("＋", key=f"add_measure_{family_key}"):
-                        if measure_text and any(measure_types_selected.values()) and risk_name:
-                            # Vérifier si le risque existe déjà, sinon le créer
-                            risk_key = f"{family_key} - {risk_name}"
-                            if risk_key not in st.session_state.risk_families[family_key]["risks"]:
-                                add_risk(family_key, risk_name, risk_desc, selected_processes)
-                            
-                            # Ajouter la mesure
-                            for m_type, selected in measure_types_selected.items():
-                                if selected:
-                                    add_measure(family_key, risk_key, m_type, measure_text)
-                            
-                            # Reset form fields
-                            st.session_state[f"measure_text_{family_key}"] = ""
-                            for m_type in MEASURE_TYPES:
-                                st.session_state[f"measure_type_{family_key}_{m_type}"] = False
-                            st.rerun()
-                        elif not risk_name:
-                            st.error("Veuillez d'abord saisir un nom de risque")
+   # Affichage des familles de risques
+   for family_key, family_data in st.session_state.risk_families.items():
+       with st.expander(f"📁 {family_data['name']}", expanded=False):
+           cols = st.columns([20, 1])
+           with cols[1]:
+               if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
+                   st.session_state[f"show_risk_form_{family_key}"] = True
+           
+           if st.session_state.get(f"show_risk_form_{family_key}", False):
+               # Zone d'édition du risque
+               col1, col2 = st.columns([2, 1])
+               with col1:
+                   risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
+                   risk_desc = st.text_area("Description", key=f"risk_desc_{family_key}", height=100)
+               with col2:
+                   selected_processes = st.multiselect("Processus concernés", PROCESSES)
+               
+               # Section des mesures
+               st.markdown("### Mesures")
+               measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
+               cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
+               measure_types_selected = {}
+               
+               # Selection des types de mesures
+               for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+                   with cols[i]:
+                       measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
+               
+               # Bouton d'ajout de mesure
+               with cols[-1]:
+                   if st.button("＋", key=f"add_measure_{family_key}"):
+                       if measure_text and any(measure_types_selected.values()) and risk_name:
+                           # Vérifier si le risque existe déjà, sinon le créer
+                           risk_key = f"{family_key} - {risk_name}"
+                           if risk_key not in st.session_state.risk_families[family_key]["risks"]:
+                               add_risk(family_key, risk_name, risk_desc, selected_processes)
+                           
+                           # Ajouter la mesure
+                           for m_type, selected in measure_types_selected.items():
+                               if selected:
+                                   add_measure(family_key, risk_key, m_type, measure_text)
+                           
+                           st.rerun()
+                       elif not risk_name:
+                           st.error("Veuillez d'abord saisir un nom de risque")
 
-                # Boutons de validation/annulation du risque
-                col1, col2 = st.columns([1, 4])
-                with col1:
-                    if st.button("✓ Valider", key=f"validate_{family_key}"):
-                        if risk_name:
-                            add_risk(family_key, risk_name, risk_desc, selected_processes)
-                            st.session_state[f"show_risk_form_{family_key}"] = False
-                            st.rerun()
-                with col2:
-                    if st.button("Annuler", key=f"cancel_{family_key}"):
-                        st.session_state[f"show_risk_form_{family_key}"] = False
-                        st.rerun()
-            
-            # Affichage compact des risques existants
-            for risk_key, risk_data in family_data["risks"].items():
-                if (selected_process == "Tous" or selected_process in risk_data.get("processes", [])):
-                    # Calcul des compteurs de mesures
-                    measure_counts = {
-                        MEASURE_TYPES[m_type]: len(measures) 
-                        for m_type, measures in risk_data["measures"].items()
-                    }
-                    
-                    # Affichage compact sur une ligne
-                    cols = st.columns([8, 4, 4, 1])
-                    with cols[0]:
-                        st.markdown(f"**{risk_key.split(' - ')[1]}**")
-                    with cols[1]:
-                        st.markdown(", ".join(risk_data["processes"][:2] + (["..."] if len(risk_data["processes"]) > 2 else [])))
-                    with cols[2]:
-                        st.markdown(" ".join([
-                            f'<span style="background:#f5f5f5;padding:0 0.25rem;border-radius:2px;font-size:0.7rem">{t}:{c}</span>'
-                            for t, c in measure_counts.items() if c > 0
-                        ]), unsafe_allow_html=True)
-                    with cols[3]:
-                        if st.button("📝", key=f"edit_{risk_key}"):
-                            st.session_state[f"edit_risk_{risk_key}"] = True
+               # Boutons de validation/annulation du risque
+               col1, col2 = st.columns([1, 4])
+               with col1:
+                   if st.button("✓ Valider", key=f"validate_{family_key}"):
+                       if risk_name:
+                           add_risk(family_key, risk_name, risk_desc, selected_processes)
+                           st.session_state[f"show_risk_form_{family_key}"] = False
+                           st.rerun()
+               with col2:
+                   if st.button("Annuler", key=f"cancel_{family_key}"):
+                       st.session_state[f"show_risk_form_{family_key}"] = False
+                       st.rerun()
+           
+           # Affichage compact des risques existants
+           for risk_key, risk_data in family_data["risks"].items():
+               if (selected_process == "Tous" or selected_process in risk_data.get("processes", [])):
+                   # Calcul des compteurs de mesures
+                   measure_counts = {
+                       MEASURE_TYPES[m_type]: len(measures) 
+                       for m_type, measures in risk_data["measures"].items()
+                   }
+                   
+                   # Affichage compact sur une ligne
+                   cols = st.columns([8, 4, 4, 1])
+                   with cols[0]:
+                       st.markdown(f"**{risk_key.split(' - ')[1]}**")
+                   with cols[1]:
+                       st.markdown(", ".join(risk_data["processes"][:2] + (["..."] if len(risk_data["processes"]) > 2 else [])))
+                   with cols[2]:
+                       st.markdown(" ".join([
+                           f'<span style="background:#f5f5f5;padding:0 0.25rem;border-radius:2px;font-size:0.7rem">{t}:{c}</span>'
+                           for t, c in measure_counts.items() if c > 0
+                       ]), unsafe_allow_html=True)
+                   with cols[3]:
+                       if st.button("📝", key=f"edit_{risk_key}"):
+                           st.session_state[f"edit_risk_{risk_key}"] = True
 							
 with tab2:
     st.header("Vue par Processus")
