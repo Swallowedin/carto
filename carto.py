@@ -217,25 +217,25 @@ with tab1:
                     st.markdown("### Mesures")
                     
                     # Champs pour nouvelle mesure
-                    measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
-                    cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
-                    measure_types_selected = {}
-                    
-                    for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
-                        with cols[i]:
-                            measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
-                    
-                    with cols[-1]:
-                        if st.button("＋", key=f"add_measure_{family_key}"):
-                            if measure_text and any(measure_types_selected.values()):
-                                for m_type, selected in measure_types_selected.items():
-                                    if selected:
-                                        add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
-                                # Reset form fields
-                                st.session_state[f"measure_text_{family_key}"] = ""
-                                for m_type in MEASURE_TYPES:
-                                    st.session_state[f"measure_type_{family_key}_{m_type}"] = False
-                                st.rerun()
+					measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
+					cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
+					measure_types_selected = {}
+
+					for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+						with cols[i]:
+							measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
+
+					with cols[-1]:
+						add_measure_button = st.form_submit_button("＋", key=f"add_measure_{family_key}")
+						if add_measure_button and measure_text and any(measure_types_selected.values()):
+							for m_type, selected in measure_types_selected.items():
+								if selected:
+									add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
+							# Reset form fields
+							st.session_state[f"measure_text_{family_key}"] = ""
+							for m_type in MEASURE_TYPES:
+								st.session_state[f"measure_type_{family_key}_{m_type}"] = False
+							st.rerun()
                     
                     # Boutons de validation/annulation
                     col1, col2 = st.columns([1, 4])
