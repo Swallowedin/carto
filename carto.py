@@ -113,6 +113,42 @@ def delete_measure(family_key, risk_key, measure_type, measure_index):
     measures = st.session_state.risk_families[family_key]["risks"][risk_key]["measures"][measure_type]
     if 0 <= measure_index < len(measures):
         del measures[measure_index]
+		
+def get_process_coverage_stats(process_name):
+    """Calcule les statistiques de couverture pour un processus"""
+    stats = {
+        "total_risks": 0,
+        "measures_by_type": defaultdict(int),
+        "risks_by_family": defaultdict(int),
+        "total_measures": 0
+    }
+    
+    for family_key, family_data in st.session_state.risk_families.items():
+        for risk_key, risk_data in family_data["risks"].items():
+            if process_name in risk_data.get("processes", []):
+                stats["total_risks"] += 1
+                stats["risks_by_family"][family_key] += 1
+                
+                for measure_type, measures in risk_data["measures"].items():
+                    measure_count = len(measures)
+                    stats["measures_by_type"][measure_type] += measure_count
+                    stats["total_measures"] += measure_count
+    
+    return stats
+
+def get_risks_by_process(process_name):
+    """Récupère tous les risques associés à un processus"""
+    process_risks = []
+    for family_key, family_data in st.session_state.risk_families.items():
+        for risk_key, risk_data in family_data["risks"].items():
+            if process_name in risk_data.get("processes", []):
+                process_risks.append({
+                    "family": family_key,
+                    "risk": risk_key,
+                    "description": risk_data["description"],
+                    "measures": risk_data["measures"]
+                })
+    return process_risks
 
 # Interface principale
 header_col1, header_col2, header_col3 = st.columns([2, 1, 1])
