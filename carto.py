@@ -215,8 +215,6 @@ with tab1:
                             delete_risk(family_key, risk_key)
                             st.rerun()
 
-[Les deux premières parties du code restent identiques jusqu'à la gestion des mesures dans tab1]
-
                     # Modification de la gestion des mesures pour un risque
                     with st.expander("Ajouter une mesure", expanded=False):
                         with st.form(key=f"measure_form_{risk_key}"):
@@ -268,9 +266,8 @@ with tab1:
                                             measures = risk_data["measures"][m_type]
                                             if measure in measures:
                                                 measures.remove(measure)
-                                        st.rerun()
+                                        st.rerun()					
 
-# Tab 2: Vue par processus
 with tab2:
     st.header("Vue par Processus")
     
