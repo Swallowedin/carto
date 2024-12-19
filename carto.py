@@ -203,52 +203,52 @@ with tab1:
                     st.session_state[f"show_risk_form_{family_key}"] = True
             
             if st.session_state.get(f"show_risk_form_{family_key}", False):
-                with st.form(key=f"risk_form_{family_key}", clear_on_submit=False):
-                    # Formulaire principal
-                    col1, col2 = st.columns([2, 1])
-                    with col1:
-                        risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
-                        risk_desc = st.text_area("Description", key=f"risk_desc_{family_key}", height=100)
-                    with col2:
-                        selected_processes = st.multiselect("Processus concernés", PROCESSES)
-                    
-                    # Section des mesures
-                    st.markdown("### Mesures")
-                    measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
-                    cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
-                    measure_types_selected = {}
-                    
-                    # Selection des types de mesures
-                    for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
-                        with cols[i]:
-                            measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
-                    
-                    # Bouton d'ajout de mesure
-                    with cols[-1]:
-                        add_measure_button = st.form_submit_button("＋", key=f"add_measure_{family_key}")
-                        if add_measure_button:
-                            if measure_text and any(measure_types_selected.values()):
-                                for m_type, selected in measure_types_selected.items():
-                                    if selected:
-                                        add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
-                                # Reset form fields
-                                st.session_state[f"measure_text_{family_key}"] = ""
-                                for m_type in MEASURE_TYPES:
-                                    st.session_state[f"measure_type_{family_key}_{m_type}"] = False
-                                st.rerun()
-                    
-                    # Boutons de validation/annulation du risque
-                    col1, col2 = st.columns([1, 4])
-                    with col1:
-                        submit = st.form_submit_button("✓ Valider")
-                        if submit and risk_name:
+                # Zone d'édition du risque
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    risk_name = st.text_input("Nom du risque", key=f"risk_name_{family_key}")
+                    risk_desc = st.text_area("Description", key=f"risk_desc_{family_key}", height=100)
+                with col2:
+                    selected_processes = st.multiselect("Processus concernés", PROCESSES)
+                
+                # Section des mesures
+                st.markdown("### Mesures")
+                measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
+                cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
+                measure_types_selected = {}
+                
+                # Selection des types de mesures
+                for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+                    with cols[i]:
+                        measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
+                
+                # Bouton d'ajout de mesure
+                with cols[-1]:
+                    if st.button("＋", key=f"add_measure_{family_key}"):
+                        if measure_text and any(measure_types_selected.values()):
+                            if not risk_name:  # On crée d'abord le risque s'il n'existe pas
+                                add_risk(family_key, risk_name, risk_desc, selected_processes)
+                            for m_type, selected in measure_types_selected.items():
+                                if selected:
+                                    add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
+                            # Reset form fields
+                            st.session_state[f"measure_text_{family_key}"] = ""
+                            for m_type in MEASURE_TYPES:
+                                st.session_state[f"measure_type_{family_key}_{m_type}"] = False
+                            st.rerun()
+                
+                # Boutons de validation/annulation du risque
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    if st.button("✓ Valider", key=f"validate_{family_key}"):
+                        if risk_name:
                             add_risk(family_key, risk_name, risk_desc, selected_processes)
                             st.session_state[f"show_risk_form_{family_key}"] = False
                             st.rerun()
-                    with col2:
-                        if st.form_submit_button("Annuler"):
-                            st.session_state[f"show_risk_form_{family_key}"] = False
-                            st.rerun()
+                with col2:
+                    if st.button("Annuler", key=f"cancel_{family_key}"):
+                        st.session_state[f"show_risk_form_{family_key}"] = False
+                        st.rerun()
             
             # Affichage compact des risques existants
             for risk_key, risk_data in family_data["risks"].items():
