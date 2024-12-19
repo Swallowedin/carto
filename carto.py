@@ -215,7 +215,9 @@ with tab1:
                     </span>
                 </div>
             """, unsafe_allow_html=True)
-
+	    if st.button("", key=f"add_risk_{family_key}", help="Ajouter un risque"):
+                st.session_state[f"show_risk_form_{family_key}"] = True
+		
             # Formulaire d'ajout de risque
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
