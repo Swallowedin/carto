@@ -207,14 +207,16 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-			# Ajouter un bouton discret en haut à droite
-			st.markdown("""
-				<div style='text-align:right;margin-top:-0.5rem;margin-bottom:0.5rem'>
-					<span style='color:#666;font-size:0.8em;cursor:pointer;border:1px solid #ddd;padding:2px 6px;border-radius:3px;background:#f8f9fa'>Ajouter un risque</span>
-				</div>
-			""", unsafe_allow_html=True)
-			if st.button("", key=f"add_risk_{family_key}", help="Ajouter un risque"):
-				st.session_state[f"show_risk_form_{family_key}"] = True
+            # En-tête avec bouton discret
+            st.markdown("""
+                <div style='text-align:right;margin:-0.5rem 0 0.5rem 0'>
+                    <span style='color:#666;font-size:0.8em;cursor:pointer;border:1px solid #ddd;padding:2px 6px;border-radius:3px;background:#f8f9fa'>
+                        + Ajouter un risque
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button("", key=f"add_risk_{family_key}", help="Ajouter un risque"):
+                st.session_state[f"show_risk_form_{family_key}"] = True
 
             # Formulaire d'ajout de risque
             if st.session_state.get(f"show_risk_form_{family_key}", False):
