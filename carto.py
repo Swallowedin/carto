@@ -247,7 +247,7 @@ with tab1:
                             delete_risk(family_key, risk_key)
                             st.rerun()
 
-                    # Zone de gestion des mesures
+# Zone de gestion des mesures
                     with st.container():
                         # Ajout de mesure
                         new_measure = st.text_area(
@@ -278,66 +278,26 @@ with tab1:
 
                     # Affichage des mesures existantes
                     if any(risk_data["measures"].values()):
-                        with st.container():
-                            st.markdown("##### Mesures existantes")
-                            for m_type, measures in risk_data["measures"].items():
-                                if measures:
-                                    for i, measure in enumerate(measures):
-                                        cols = st.columns([5, 1])
-                                        with cols[0]:
-                                            st.write(f"**{MEASURE_TYPES[m_type]}**: {measure}")
-                                        with cols[1]:
-                                            if st.button("🗑️", key=f"del_measure_{risk_key}_{m_type}_{i}"):
-                                                delete_measure(family_key, risk_key, m_type, i)
-                                                st.rerun()
-
-                # Affichage des mesures existantes
-                if any(risk_data["measures"].values()):
-                    st.markdown("##### Mesures existantes")
-                    # Création d'un dictionnaire inversé pour regrouper les mesures identiques
-                    measures_by_description = defaultdict(list)
-                    for m_type, measures in risk_data["measures"].items():
-                        for measure in measures:
-                            measures_by_description[measure].append(m_type)
-                    
-                    # Affichage des mesures avec leurs types
-                    for measure, types in measures_by_description.items():
-                        col1, col2 = st.columns([5, 1])
-                        with col1:
-                            st.write(f"📝 {measure}")
-                            st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
-                        with col2:
-                            if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
-                                # Suppression de la mesure de tous les types associés
-                                for m_type in types:
-                                    measures = risk_data["measures"][m_type]
-                                    if measure in measures:
-                                        measures.remove(measure)
-                                st.rerun()
-                    
-                    # Affichage des mesures existantes
-                    if any(risk_data["measures"].values()):
-                        with st.expander("Mesures existantes", expanded=True):
-                            # Création d'un dictionnaire inversé pour regrouper les mesures identiques
-                            measures_by_description = defaultdict(list)
-                            for m_type, measures in risk_data["measures"].items():
-                                for measure in measures:
-                                    measures_by_description[measure].append(m_type)
-                            
-                            # Affichage des mesures avec leurs types
-                            for measure, types in measures_by_description.items():
-                                col1, col2 = st.columns([5, 1])
-                                with col1:
-                                    st.write(f"📝 {measure}")
-                                    st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
-                                with col2:
-                                    if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
-                                        # Suppression de la mesure de tous les types associés
-                                        for m_type in types:
-                                            measures = risk_data["measures"][m_type]
-                                            if measure in measures:
-                                                measures.remove(measure)
-                                        st.rerun()					
+                        st.markdown("##### Mesures existantes")
+                        measures_by_description = defaultdict(list)
+                        for m_type, measures in risk_data["measures"].items():
+                            for measure in measures:
+                                measures_by_description[measure].append(m_type)
+                        
+                        # Affichage des mesures avec leurs types
+                        for measure, types in measures_by_description.items():
+                            col1, col2 = st.columns([5, 1])
+                            with col1:
+                                st.write(f"📝 {measure}")
+                                st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
+                            with col2:
+                                if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
+                                    # Suppression de la mesure de tous les types associés
+                                    for m_type in types:
+                                        measures = risk_data["measures"][m_type]
+                                        if measure in measures:
+                                            measures.remove(measure)
+                                    st.rerun()				
 
 with tab2:
     st.header("Vue par Processus")
