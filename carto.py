@@ -15,16 +15,14 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    .add-risk-link {
-        float: right;
-        font-size: 0.75rem;
-        color: #666;
-        padding: 2px 6px;
-        text-decoration: none;
-        margin-top: -0.5rem;
-    }
-    .add-risk-link:hover {
-        color: #000;
+    /* Style du bouton d'ajout */
+    [data-testid="stExpander"] [data-testid="baseButton-secondary"] {
+        background: transparent !important;
+        border: none !important;
+        color: #666 !important;
+        font-size: 15px !important;
+        padding: 0 !important;
+        margin-top: -5px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -199,12 +197,12 @@ with tab1:
 		
 
 # Affichage des familles de risques
-# Dans l'affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # Lien discret pour ajouter un risque
-            st.markdown(f"""<div><a href="#" class="add-risk-link" data-key="{family_key}">+ Ajouter un risque</a></div>""", 
-                      unsafe_allow_html=True)
+            cols = st.columns([20, 1])
+            with cols[1]:
+                if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
+                    st.session_state[f"show_risk_form_{family_key}"] = True
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
                     # Formulaire principal
