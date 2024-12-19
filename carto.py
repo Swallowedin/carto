@@ -15,25 +15,22 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Ciblage plus précis du bouton d'ajout */
-    div[data-testid="stExpander"] button:last-child,
-    div[data-testid="stExpander"] [aria-label="+"] {
-        padding: 0.1rem 0.3rem !important;
-        min-width: 20px !important;
-        width: 20px !important;
-        height: 20px !important;
-        line-height: 1 !important;
-        font-size: 0.7rem !important;
-        border: 1px solid #ddd !important;
-        background: transparent !important;
-        color: #666 !important;
-        float: right !important;
-        margin-top: -2px !important;
+    .discrete-add-button {
+        color: #666;
+        font-size: 0.8em;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        padding: 2px 6px;
+        border-radius: 3px;
+        background: #f8f9fa;
+        text-decoration: none;
+        float: right;
+        margin-top: -0.5rem;
+        margin-bottom: 0.5rem;
     }
-
-    /* Réduire l'espace autour du bouton */
-    div[data-testid="stExpander"] > div:first-child {
-        margin-bottom: 0 !important;
+    .discrete-add-button:hover {
+        background: #e9ecef;
+        text-decoration: none;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -207,11 +204,13 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # Remplacer le markup HTML et le bouton invisible par un unique bouton Streamlit
-            col1, col2 = st.columns([10, 2])
-            with col2:
-                if st.button("➕ Ajouter un risque", key=f"add_risk_{family_key}", type="secondary", use_container_width=True):
-                    st.session_state[f"show_risk_form_{family_key}"] = True
+            # Bouton discret unique
+            if st.markdown(f"""
+                <div style='text-align:right'>
+                    <a href="#" class="discrete-add-button" data-key="{family_key}">+ Ajouter un risque</a>
+                </div>
+                """, unsafe_allow_html=True):
+                st.session_state[f"show_risk_form_{family_key}"] = True
 
             # Formulaire d'ajout de risque
             if st.session_state.get(f"show_risk_form_{family_key}", False):
@@ -223,12 +222,10 @@ with tab1:
                     col1, col2 = st.columns(2)
                     with col1:
                         if st.form_submit_button("Ajouter"):
-                            if risk_name:  # Vérification que le nom n'est pas vide
+                            if risk_name:
                                 add_risk(family_key, risk_name, risk_desc, selected_processes)
                                 st.session_state[f"show_risk_form_{family_key}"] = False
                                 st.rerun()
-                            else:
-                                st.error("Le nom du risque est requis")
                     with col2:
                         if st.form_submit_button("Annuler"):
                             st.session_state[f"show_risk_form_{family_key}"] = False
