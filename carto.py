@@ -15,25 +15,29 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Ciblage plus précis du bouton d'ajout */
-    div[data-testid="stExpander"] button:last-child,
-    div[data-testid="stExpander"] [aria-label="+"] {
-        padding: 0.1rem 0.3rem !important;
-        min-width: 20px !important;
-        width: 20px !important;
-        height: 20px !important;
-        line-height: 1 !important;
-        font-size: 0.7rem !important;
-        border: 1px solid #ddd !important;
-        background: transparent !important;
+    /* Style pour le bouton discret d'ajout de risque */
+    .discrete-button {
         color: #666 !important;
+        font-size: 0.8em !important;
+        border: 1px solid #ddd !important;
+        padding: 2px 6px !important;
+        border-radius: 3px !important;
+        background-color: #f8f9fa !important;
+        width: auto !important;
+        margin-top: -0.5rem !important;
+        margin-bottom: 0.5rem !important;
         float: right !important;
-        margin-top: -2px !important;
     }
-
-    /* Réduire l'espace autour du bouton */
-    div[data-testid="stExpander"] > div:first-child {
-        margin-bottom: 0 !important;
+    
+    /* Suppression des styles par défaut de Streamlit */
+    .discrete-button div {
+        display: inline !important;
+    }
+    
+    .discrete-button:hover {
+        background-color: #e9ecef !important;
+        color: #444 !important;
+        border-color: #ccc !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -210,12 +214,27 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # En-tête avec bouton discret
-            st.markdown("""
-                <div style='text-align:right;margin:-0.5rem 0 0.5rem 0'>
-                    <a href="#" style='color:#666;font-size:0.8em;cursor:pointer;border:1px solid #ddd;padding:2px 6px;border-radius:3px;background:#f8f9fa;text-decoration:none;'>+ Ajouter un risque</a>
-                </div>
-                """, unsafe_allow_html=True)
+            # Bouton discret qui fonctionne
+            if st.button("+ Ajouter un risque", key=f"add_risk_{family_key}", 
+                        kwargs={"family_key": family_key},
+                        use_container_width=False):
+                st.session_state[f"show_risk_form_{family_key}"] = True
+
+            # Force l'application du style après le rendu du bouton
+            st.markdown(f"""
+                <style>
+                    div[data-testid="stButton"] button[kind="secondary"]:nth-last-of-type(1) {{
+                        font-size: 0.8em !important;
+                        padding: 2px 6px !important;
+                        background-color: #f8f9fa !important;
+                        color: #666 !important;
+                        border: 1px solid #ddd !important;
+                        float: right !important;
+                        margin-top: -0.5rem !important;
+                        margin-bottom: 0.5rem !important;
+                    }}
+                </style>
+            """, unsafe_allow_html=True)
 
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}"):
