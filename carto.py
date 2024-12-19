@@ -161,28 +161,6 @@ with col2:
     with upload_col:
         uploaded_file = st.file_uploader("", type="csv", label_visibility="collapsed")
 
-# Formulaire d'ajout de famille
-if st.session_state.get('show_family_form', False):
-    with st.form("new_family_form"):
-        st.subheader("Nouvelle Famille de Risques")
-        col1, col2 = st.columns(2)
-        with col1:
-            family_key = st.text_input("Code", placeholder="Ex: FIN")
-        with col2:
-            family_name = st.text_input("Nom", placeholder="Ex: Finance")
-        
-        col3, col4 = st.columns(2)
-        with col3:
-            if st.form_submit_button("Ajouter"):
-                if family_key and family_name:
-                    add_risk_family(family_key, family_name)
-                    st.session_state.show_family_form = False
-                    st.rerun()
-        with col4:
-            if st.form_submit_button("Annuler"):
-                st.session_state.show_family_form = False
-                st.rerun()
-
 # Onglets principaux
 tab1, tab2, tab3 = st.tabs([
     "📊 Risques | Gestion par famille",
@@ -192,9 +170,32 @@ tab1, tab2, tab3 = st.tabs([
 
 # Tab 1: Gestion par famille
 with tab1:
-
+    # Bouton pour ajouter une nouvelle famille
     if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
         st.session_state.show_family_form = True
+    
+    # Formulaire d'ajout de famille
+    if st.session_state.get('show_family_form', False):
+        with st.form("new_family_form"):
+            st.subheader("Nouvelle Famille de Risques")
+            col1, col2 = st.columns(2)
+            with col1:
+                family_key = st.text_input("Code", placeholder="Ex: FIN")
+            with col2:
+                family_name = st.text_input("Nom", placeholder="Ex: Finance")
+            
+            col3, col4 = st.columns(2)
+            with col3:
+                if st.form_submit_button("Ajouter"):
+                    if family_key and family_name:
+                        add_risk_family(family_key, family_name)
+                        st.session_state.show_family_form = False
+                        st.rerun()
+            with col4:
+                if st.form_submit_button("Annuler"):
+                    st.session_state.show_family_form = False
+                    st.rerun()
+    
 		
     # Barre de recherche et filtres
     col1, col2, col3 = st.columns([2, 1, 1])
