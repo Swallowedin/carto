@@ -15,7 +15,7 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Ciblage plus précis du bouton d'ajout */
+    /* Ciblage précis du bouton d'ajout */
     div[data-testid="stExpander"] button:last-child,
     div[data-testid="stExpander"] [aria-label="+"] {
         padding: 0.1rem 0.3rem !important;
@@ -30,6 +30,13 @@ st.markdown("""
         float: right !important;
         margin-top: -2px !important;
     }
+
+    /* Réduire l'espace autour du bouton */
+    div[data-testid="stExpander"] > div:first-child {
+        margin-bottom: 0 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
     /* Réduire l'espace autour du bouton */
     div[data-testid="stExpander"] > div:first-child {
