@@ -157,7 +157,7 @@ tab1, tab2, tab3 = st.tabs([
     "🏢 Service | Impact par service"
 ])
 
-# Tab 1: Gestion par famille
+
 with tab1:
     # Bouton pour ajouter une nouvelle famille
     if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
@@ -185,7 +185,6 @@ with tab1:
                     st.session_state.show_family_form = False
                     st.rerun()
     
-		
     # Barre de recherche et filtres
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
@@ -194,15 +193,15 @@ with tab1:
         selected_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
     with col3:
         selected_measure_type = st.selectbox("Type de mesure", ["Tous"] + list(MEASURE_TYPES.values()))
-		
 
-# Affichage des familles de risques
+    # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
             cols = st.columns([20, 1])
             with cols[1]:
                 if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
                     st.session_state[f"show_risk_form_{family_key}"] = True
+            
             if st.session_state.get(f"show_risk_form_{family_key}", False):
                 with st.form(key=f"risk_form_{family_key}", clear_on_submit=False):
                     # Formulaire principal
@@ -215,29 +214,30 @@ with tab1:
                     
                     # Section des mesures
                     st.markdown("### Mesures")
+                    measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
+                    cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
+                    measure_types_selected = {}
                     
-                    # Champs pour nouvelle mesure
-					measure_text = st.text_area("Description de la mesure", height=100, key=f"measure_text_{family_key}")
-					cols = st.columns([3, 3, 3, 3, 3, 1])  # 5 types + 1 bouton
-					measure_types_selected = {}
-
-					for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
-						with cols[i]:
-							measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
-
-					with cols[-1]:
-						add_measure_button = st.form_submit_button("＋", key=f"add_measure_{family_key}")
-						if add_measure_button and measure_text and any(measure_types_selected.values()):
-							for m_type, selected in measure_types_selected.items():
-								if selected:
-									add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
-							# Reset form fields
-							st.session_state[f"measure_text_{family_key}"] = ""
-							for m_type in MEASURE_TYPES:
-								st.session_state[f"measure_type_{family_key}_{m_type}"] = False
-							st.rerun()
+                    # Selection des types de mesures
+                    for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+                        with cols[i]:
+                            measure_types_selected[m_type] = st.checkbox(m_name, key=f"measure_type_{family_key}_{m_type}")
                     
-                    # Boutons de validation/annulation
+                    # Bouton d'ajout de mesure
+                    with cols[-1]:
+                        add_measure_button = st.form_submit_button("＋", key=f"add_measure_{family_key}")
+                        if add_measure_button:
+                            if measure_text and any(measure_types_selected.values()):
+                                for m_type, selected in measure_types_selected.items():
+                                    if selected:
+                                        add_measure(family_key, f"{family_key} - {risk_name}", m_type, measure_text)
+                                # Reset form fields
+                                st.session_state[f"measure_text_{family_key}"] = ""
+                                for m_type in MEASURE_TYPES:
+                                    st.session_state[f"measure_type_{family_key}_{m_type}"] = False
+                                st.rerun()
+                    
+                    # Boutons de validation/annulation du risque
                     col1, col2 = st.columns([1, 4])
                     with col1:
                         submit = st.form_submit_button("✓ Valider")
