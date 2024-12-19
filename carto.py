@@ -229,7 +229,7 @@ with tab1:
                             st.session_state[f"show_risk_form_{family_key}"] = False
                             st.rerun()
 
-            # Liste des risques
+# Liste des risques
             for risk_key, risk_data in family_data["risks"].items():
                 # Filtrage
                 if selected_process != "Tous" and selected_process not in risk_data.get("processes", []):
@@ -237,73 +237,71 @@ with tab1:
                 if search_term and search_term.lower() not in risk_key.lower():
                     continue
 
-                with st.container():
-                    # En-tête du risque
-                    cols = st.columns([6, 1, 1])
-                    with cols[0]:
-                        st.markdown(f"**{risk_key.split(' - ')[1]}**")
-                        st.caption(risk_data["description"])
-                    with cols[1]:
-                        if st.button("📝", key=f"edit_{risk_key}"):
-                            st.session_state[f"edit_risk_{risk_key}"] = True
-                    with cols[2]:
-                        if st.button("🗑️", key=f"del_{risk_key}"):
-                            delete_risk(family_key, risk_key)
-                            st.rerun()
+                st.markdown("---")  # Séparateur visuel
+                # En-tête du risque
+                cols = st.columns([6, 1, 1])
+                with cols[0]:
+                    st.markdown(f"**{risk_key.split(' - ')[1]}**")
+                    st.caption(risk_data["description"])
+                with cols[1]:
+                    if st.button("📝", key=f"edit_{risk_key}"):
+                        st.session_state[f"edit_risk_{risk_key}"] = True
+                with cols[2]:
+                    if st.button("🗑️", key=f"del_{risk_key}"):
+                        delete_risk(family_key, risk_key)
+                        st.rerun()
 
-                    with st.container():
-                        st.markdown("#### Mesures")
-                        
-                        # Zone d'ajout de mesure
-                        new_measure = st.text_area(
-                            "Description de la mesure",
-                            key=f"measure_desc_{risk_key}",
-                            placeholder="Décrivez la mesure...",
-                            height=100
+                # Ajout de mesure
+                st.markdown("##### Ajouter une mesure")
+                new_measure = st.text_area(
+                    "Description de la mesure",
+                    key=f"measure_desc_{risk_key}",
+                    placeholder="Décrivez la mesure...",
+                    height=100
+                )
+                
+                # Cases à cocher pour les types de mesure
+                st.markdown("Types de mesure :")
+                cols = st.columns(5)
+                measure_types_selected = {}
+                for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
+                    with cols[i]:
+                        measure_types_selected[m_type] = st.checkbox(
+                            m_name,
+                            key=f"measure_type_{risk_key}_{m_type}"
                         )
-                        
-                        # Cases à cocher pour les types de mesure
-                        st.write("Type de mesure :")
-                        cols = st.columns(5)
-                        measure_types_selected = {}
-                        for i, (m_type, m_name) in enumerate(MEASURE_TYPES.items()):
-                            with cols[i]:
-                                measure_types_selected[m_type] = st.checkbox(
-                                    m_name,
-                                    key=f"measure_type_{risk_key}_{m_type}"
-                                )
-                        
-                        if st.button("Ajouter la mesure", key=f"add_measure_btn_{risk_key}"):
-                            if new_measure:
-                                for m_type, selected in measure_types_selected.items():
-                                    if selected:
-                                        add_measure(family_key, risk_key, m_type, new_measure)
-                                st.success("Mesure ajoutée")
-                                st.rerun()
+                
+                if st.button("Ajouter la mesure", key=f"add_measure_btn_{risk_key}"):
+                    if new_measure:
+                        for m_type, selected in measure_types_selected.items():
+                            if selected:
+                                add_measure(family_key, risk_key, m_type, new_measure)
+                        st.success("Mesure ajoutée")
+                        st.rerun()
+
+                # Affichage des mesures existantes
+                if any(risk_data["measures"].values()):
+                    st.markdown("##### Mesures existantes")
+                    # Création d'un dictionnaire inversé pour regrouper les mesures identiques
+                    measures_by_description = defaultdict(list)
+                    for m_type, measures in risk_data["measures"].items():
+                        for measure in measures:
+                            measures_by_description[measure].append(m_type)
                     
-                        # Affichage des mesures existantes
-                        if any(risk_data["measures"].values()):
-                            st.markdown("#### Mesures existantes")
-                            # Création d'un dictionnaire inversé pour regrouper les mesures identiques
-                            measures_by_description = defaultdict(list)
-                            for m_type, measures in risk_data["measures"].items():
-                                for measure in measures:
-                                    measures_by_description[measure].append(m_type)
-                            
-                            # Affichage des mesures avec leurs types
-                            for measure, types in measures_by_description.items():
-                                col1, col2 = st.columns([5, 1])
-                                with col1:
-                                    st.write(f"📝 {measure}")
-                                    st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
-                                with col2:
-                                    if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
-                                        # Suppression de la mesure de tous les types associés
-                                        for m_type in types:
-                                            measures = risk_data["measures"][m_type]
-                                            if measure in measures:
-                                                measures.remove(measure)
-                                        st.rerun()
+                    # Affichage des mesures avec leurs types
+                    for measure, types in measures_by_description.items():
+                        col1, col2 = st.columns([5, 1])
+                        with col1:
+                            st.write(f"📝 {measure}")
+                            st.caption(f"Types : {', '.join([MEASURE_TYPES[t] for t in types])}")
+                        with col2:
+                            if st.button("🗑️", key=f"del_measure_{risk_key}_{hash(measure)}"):
+                                # Suppression de la mesure de tous les types associés
+                                for m_type in types:
+                                    measures = risk_data["measures"][m_type]
+                                    if measure in measures:
+                                        measures.remove(measure)
+                                st.rerun()
                     
                     # Affichage des mesures existantes
                     if any(risk_data["measures"].values()):
