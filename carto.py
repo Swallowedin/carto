@@ -15,25 +15,16 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    /* Ciblage précis du bouton d'ajout */
-    div[data-testid="stExpander"] button:last-child,
-    div[data-testid="stExpander"] [aria-label="+"] {
-        padding: 0.1rem 0.3rem !important;
-        min-width: 20px !important;
-        width: 20px !important;
-        height: 20px !important;
-        line-height: 1 !important;
-        font-size: 0.7rem !important;
-        border: 1px solid #ddd !important;
-        background: transparent !important;
-        color: #666 !important;
-        float: right !important;
-        margin-top: -2px !important;
+    .add-risk-link {
+        float: right;
+        font-size: 0.75rem;
+        color: #666;
+        padding: 2px 6px;
+        text-decoration: none;
+        margin-top: -0.5rem;
     }
-
-    /* Réduire l'espace autour du bouton */
-    div[data-testid="stExpander"] > div:first-child {
-        margin-bottom: 0 !important;
+    .add-risk-link:hover {
+        color: #000;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -210,7 +201,7 @@ with tab1:
 # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            if st.button("+", key=f"add_risk_{family_key}"):
+            if st.markdown(f"""<div><a href="#" class="add-risk-link" data-key="{family_key}">+ Ajouter un risque</a></div>""", unsafe_allow_html=True):
                 st.session_state[f"show_risk_form_{family_key}"] = True
 
             if st.session_state.get(f"show_risk_form_{family_key}", False):
