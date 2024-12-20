@@ -6,57 +6,58 @@ import base64
 import plotly.graph_objects as go
 from collections import defaultdict
 
+# Configuration de la page
+st.set_page_config(
+    page_title="Gestion des Risques",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Styles CSS
 st.markdown("""
     <style>
-    /* Style commun pour l'uploader et les liens */
+    /* Nettoyage général de l'interface */
+    .block-container {
+        padding-top: 2rem;
+    }
+
+    /* Style de l'uploader */
     [data-testid="stFileUploader"] {
         background-color: transparent !important;
         border: 1px dashed #ccc !important;
         padding: 0.3rem 0.5rem !important;
         border-radius: 4px !important;
+        width: fit-content !important;
     }
     
     [data-testid="stFileUploader"]:hover {
         border-color: #666 !important;
     }
     
-    /* Masquer les éléments superflus de l'uploader */
-    [data-testid="stFileUploader"] div:first-child, 
+    /* Masquer les textes superflus */
+    [data-testid="stFileUploader"] div:first-child,
     [data-testid="stFileUploader"] small {
-        display: none;
+        display: none !important;
     }
     
-    /* Style des boutons de téléchargement */
+    /* Ajustement des boutons de téléchargement */
     .download-link {
         text-decoration: none !important;
         color: #666 !important;
         font-size: 14px !important;
-        background-color: transparent !important;
         border: 1px dashed #ccc !important;
         padding: 0.3rem 0.5rem !important;
         border-radius: 4px !important;
-        margin-right: 0.5rem;
-        display: inline-block;
     }
 
     .download-link:hover {
         border-color: #666 !important;
     }
 
-    /* Style du conteneur des boutons */
     .download-container {
         display: flex;
         gap: 0.5rem;
-    }
-
-    /* Style des boutons d'ajout */
-    [data-testid="baseButton-secondary"] {
-        background: transparent !important;
-        border: none !important;
-        color: #666 !important;
-        font-size: 15px !important;
-        padding: 0 !important;
-        margin-top: -5px !important;
+        align-items: center;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -85,13 +86,14 @@ MEASURE_TYPES = {
 
 # Fonctions de base
 # Fonctions de gestion des fichiers
+
 def save_to_json():
     """Exporte les données en JSON"""
     json_str = json.dumps(st.session_state.risk_families, ensure_ascii=False, indent=2)
     b64 = base64.b64encode(json_str.encode()).decode()
     current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
     filename = f"risk_data_{current_time}.json"
-    return f'<a class="download-link" href="data:file/json;base64,{b64}" download="{filename}">📥 JSON</a>'
+    return f'<a class="download-link" href="data:file/json;base64,{b64}" download="{filename}">JSON</a>'
 
 def save_to_csv():
     """Exporte les données en CSV"""
@@ -118,7 +120,7 @@ def save_to_csv():
         b64 = base64.b64encode(csv.encode()).decode()
         current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"risk_data_{current_time}.csv"
-        return f'<a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">📥 CSV</a>'
+        return f'<a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">CSV</a>'
     return ""
 	
 def load_from_json(uploaded_file):
@@ -257,7 +259,7 @@ with col2:
             f"""<div class="download-container">
                 {save_to_json()}
                 {save_to_csv()}
-            </div>""",
+            </div>""", 
             unsafe_allow_html=True
         )
 
