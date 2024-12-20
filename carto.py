@@ -762,7 +762,7 @@ with tab4:
         with col2:
             st.subheader("Actions par priorité")
             if not df_actions.empty:
-                              priority_counts = df_actions["priorite"].value_counts()
+                priority_counts = df_actions["priorite"].value_counts()
                 st.bar_chart(priority_counts)
 
     elif view_mode == "Suivi des mesures":
