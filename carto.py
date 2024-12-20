@@ -575,7 +575,9 @@ with tab4:
                                 st.rerun()
                         with submit_col2:
                             if st.form_submit_button("Annuler"):
-                                st.session_state[f"show_action_form_{measure['id']}"] =# Interface principale
+                                st.session_state[f"show_action_form_{measure['id']}"] =
+
+# Interface principale
 col1, col2 = st.columns([3, 1])
 with col1:
     st.markdown("### Gestion des Risques")
