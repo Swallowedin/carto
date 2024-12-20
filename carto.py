@@ -10,15 +10,22 @@ from collections import defaultdict
 st.set_page_config(
     page_title="Gestion des Risques",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
+    menu_items=None  # Ceci cache la barre Streamlit Cloud
 )
 
-# Styles CSS
+# Styles CSS complets
 st.markdown("""
     <style>
-    /* Nettoyage général de l'interface */
+    /* Cacher la barre Streamlit */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+
+    /* Style de base de la page */
     .block-container {
-        padding-top: 2rem;
+        padding: 1rem 1rem 10rem !important;
+        max-width: 100% !important;
     }
 
     /* Style de l'uploader */
@@ -27,7 +34,7 @@ st.markdown("""
         border: 1px dashed #ccc !important;
         padding: 0.3rem 0.5rem !important;
         border-radius: 4px !important;
-        width: fit-content !important;
+        min-height: unset !important;
     }
     
     [data-testid="stFileUploader"]:hover {
@@ -40,7 +47,7 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Ajustement des boutons de téléchargement */
+    /* Style des boutons de téléchargement */
     .download-link {
         text-decoration: none !important;
         color: #666 !important;
@@ -58,6 +65,24 @@ st.markdown("""
         display: flex;
         gap: 0.5rem;
         align-items: center;
+        padding-top: 0.2rem;
+    }
+
+    /* Ajustement des marges */
+    h3 {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Style des onglets */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
