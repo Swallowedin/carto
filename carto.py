@@ -1139,13 +1139,6 @@ with tab4:
     with col3:
         st.metric("Familles couvertes", df_measures["famille"].nunique())
 
-# Gestion des notifications
-if "notifications" not in st.session_state:
-    st.session_state.notifications = []
-
-for notification in st.session_state.notifications:
-    st.toast(notification["message"])
-st.session_state.notifications = []
 
 # Gestion des notifications
 if "notifications" not in st.session_state:
