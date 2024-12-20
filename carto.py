@@ -24,6 +24,27 @@ st.markdown("""
         padding: 0 !important;
         margin-top: -5px !important;
     }
+    
+    /* Style de l'uploader */
+    [data-testid="stFileUploader"] {
+        background-color: transparent !important;
+        border: 1px dashed #ccc !important;
+    }
+    
+    [data-testid="stFileUploader"]:hover {
+        border-color: #666 !important;
+    }
+    
+    /* Cacher le texte "Drag and drop" */
+    [data-testid="stFileUploader"] div:first-child {
+        display: none;
+    }
+    
+    /* Cacher le texte du format */
+    [data-testid="stFileUploader"] small {
+        display: none;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
@@ -50,14 +71,42 @@ MEASURE_TYPES = {
 }
 
 # Fonctions de base
+# Fonctions de gestion des fichiers
 def save_to_json():
-    """Convertit les données en JSON et crée un fichier téléchargeable"""
+    """Exporte les données en JSON"""
     json_str = json.dumps(st.session_state.risk_families, ensure_ascii=False, indent=2)
     b64 = base64.b64encode(json_str.encode()).decode()
     current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
     filename = f"risk_data_{current_time}.json"
-    href = f'<a href="data:file/json;base64,{b64}" download="{filename}">Télécharger la sauvegarde</a>'
-    return href
+    return f'<a href="data:file/json;base64,{b64}" download="{filename}">📥 JSON</a>'
+
+def save_to_csv():
+    """Exporte les données en CSV"""
+    # Conversion des données en format plat pour CSV
+    rows = []
+    for family_key, family_data in st.session_state.risk_families.items():
+        for risk_key, risk_data in family_data["risks"].items():
+            for measure_type, measures in risk_data["measures"].items():
+                for measure in measures:
+                    rows.append({
+                        "family": family_key,
+                        "family_name": family_data["name"],
+                        "risk_name": risk_key.split(" - ")[1],
+                        "description": risk_data["description"],
+                        "processes": "|".join(risk_data["processes"]),
+                        "measure_type": measure_type,
+                        "measure": measure
+                    })
+    
+    # Création du CSV
+    if rows:
+        df = pd.DataFrame(rows)
+        csv = df.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"risk_data_{current_time}.csv"
+        return f'<a href="data:file/csv;base64,{b64}" download="{filename}">📥 CSV</a>'
+    return ""
 
 def load_from_json(uploaded_file):
     """Charge les données depuis un fichier JSON"""
@@ -65,6 +114,37 @@ def load_from_json(uploaded_file):
         content = uploaded_file.getvalue().decode()
         data = json.loads(content)
         st.session_state.risk_families = data
+        st.success("Données chargées avec succès !")
+        st.rerun()
+    except Exception as e:
+        st.error(f"Erreur lors du chargement : {str(e)}")
+
+def load_from_csv(uploaded_file):
+    """Charge les données depuis un fichier CSV"""
+    try:
+        df = pd.read_csv(uploaded_file)
+        new_data = {}
+        
+        # Conversion du CSV en structure de données
+        for _, row in df.iterrows():
+            family_key = row["family"]
+            if family_key not in new_data:
+                new_data[family_key] = {
+                    "name": row["family_name"],
+                    "risks": {}
+                }
+            
+            risk_key = f"{family_key} - {row['risk_name']}"
+            if risk_key not in new_data[family_key]["risks"]:
+                new_data[family_key]["risks"][risk_key] = {
+                    "description": row["description"],
+                    "processes": row["processes"].split("|"),
+                    "measures": {k: [] for k in MEASURE_TYPES}
+                }
+            
+            new_data[family_key]["risks"][risk_key]["measures"][row["measure_type"]].append(row["measure"])
+        
+        st.session_state.risk_families = new_data
         st.success("Données chargées avec succès !")
         st.rerun()
     except Exception as e:
@@ -141,14 +221,31 @@ def get_risks_by_process(process_name):
                 })
     return process_risks
 
-# Interface principale plus compacte
 col1, col2 = st.columns([3, 1])
 with col1:
     st.markdown("### Gestion des Risques")
 with col2:
-    upload_col, btn_col = st.columns([1, 1])
+    upload_col, export_col = st.columns([1, 1])
     with upload_col:
-        uploaded_file = st.file_uploader("", type="csv", label_visibility="collapsed")
+        uploaded_file = st.file_uploader(
+            "",
+            type=["json", "csv"],
+            label_visibility="collapsed",
+            help="Formats acceptés : JSON, CSV"
+        )
+        if uploaded_file:
+            if uploaded_file.type == "application/json":
+                load_from_json(uploaded_file)
+            else:
+                load_from_csv(uploaded_file)
+    with export_col:
+        st.markdown(
+            f"""<div style="display:flex;gap:10px">
+                {save_to_json()}
+                {save_to_csv()}
+            </div>""", 
+            unsafe_allow_html=True
+        )
 
 # Onglets principaux
 tab1, tab2, tab3 = st.tabs([
