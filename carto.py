@@ -73,7 +73,7 @@ def save_to_json():
     b64 = base64.b64encode(json_str.encode()).decode()
     current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
     filename = f"risk_data_{current_time}.json"
-    return f'<a href="data:file/json;base64,{b64}" download="{filename}">📥 JSON</a>'
+    return f'<a class="download-link" href="data:file/json;base64,{b64}" download="{filename}">📥 JSON</a>'
 
 def save_to_csv():
     """Exporte les données en CSV"""
@@ -100,9 +100,9 @@ def save_to_csv():
         b64 = base64.b64encode(csv.encode()).decode()
         current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"risk_data_{current_time}.csv"
-        return f'<a href="data:file/csv;base64,{b64}" download="{filename}">📥 CSV</a>'
+        return f'<a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">📥 CSV</a>'
     return ""
-
+	
 def load_from_json(uploaded_file):
     """Charge les données depuis un fichier JSON"""
     try:
