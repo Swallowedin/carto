@@ -424,7 +424,7 @@ with tab1:
                     selected_processes = st.multiselect("Processus", PROCESSES)
                 
                 # Section des mesures
-                st.markdown("####### Mesures")
+                st.markdown("###### Mesures")
                 measure_text = st.text_area("Description", height=80, key=f"measure_text_{family_key}")
                 measure_cols = st.columns([3, 3, 3, 3, 3, 1])
                 
