@@ -6,47 +6,42 @@ import base64
 import plotly.graph_objects as go
 from collections import defaultdict
 
-# Configuration de la page
-st.set_page_config(
-    page_title="Gestion des Risques",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
 st.markdown("""
     <style>
-    /* Style du bouton d'ajout */
-    [data-testid="stExpander"] [data-testid="baseButton-secondary"] {
-        background: transparent !important;
-        border: none !important;
-        color: #666 !important;
-        font-size: 15px !important;
-        padding: 0 !important;
-        margin-top: -5px !important;
-    }
-    
-    /* Style de l'uploader */
-    [data-testid="stFileUploader"] {
+    /* Style commun pour l'uploader et les liens */
+    [data-testid="stFileUploader"], .download-link {
         background-color: transparent !important;
         border: 1px dashed #ccc !important;
+        padding: 0.3rem 0.5rem !important;
+        border-radius: 4px !important;
     }
     
-    [data-testid="stFileUploader"]:hover {
+    [data-testid="stFileUploader"]:hover, .download-link:hover {
         border-color: #666 !important;
     }
     
-    /* Cacher le texte "Drag and drop" */
+    /* Masquer les éléments superflus de l'uploader */
     [data-testid="stFileUploader"] div:first-child {
         display: none;
     }
-    
-    /* Cacher le texte du format */
     [data-testid="stFileUploader"] small {
         display: none;
     }
     
+    /* Style des liens de téléchargement */
+    .download-link {
+        text-decoration: none !important;
+        color: #666 !important;
+        font-size: 14px !important;
+        margin-right: 0.5rem;
+        display: inline-block;
+    }
+    .download-container {
+        display: flex;
+        gap: 0.5rem;
+    }
     </style>
-""", unsafe_allow_html=True)
+""")
 
 # Initialisation session state
 if 'risk_families' not in st.session_state:
@@ -221,31 +216,14 @@ def get_risks_by_process(process_name):
                 })
     return process_risks
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.markdown("### Gestion des Risques")
-with col2:
-    upload_col, export_col = st.columns([1, 1])
-    with upload_col:
-        uploaded_file = st.file_uploader(
-            "",
-            type=["json", "csv"],
-            label_visibility="collapsed",
-            help="Formats acceptés : JSON, CSV"
-        )
-        if uploaded_file:
-            if uploaded_file.type == "application/json":
-                load_from_json(uploaded_file)
-            else:
-                load_from_csv(uploaded_file)
-    with export_col:
-        st.markdown(
-            f"""<div style="display:flex;gap:10px">
-                {save_to_json()}
-                {save_to_csv()}
-            </div>""", 
-            unsafe_allow_html=True
-        )
+with export_col:
+    st.markdown(
+        f"""<div class="download-container">
+            {save_to_json()}
+            {save_to_csv()}
+        </div>""", 
+        unsafe_allow_html=True
+    )
 
 # Onglets principaux
 tab1, tab2, tab3 = st.tabs([
