@@ -9,39 +9,57 @@ from collections import defaultdict
 st.markdown("""
     <style>
     /* Style commun pour l'uploader et les liens */
-    [data-testid="stFileUploader"], .download-link {
+    [data-testid="stFileUploader"] {
         background-color: transparent !important;
         border: 1px dashed #ccc !important;
         padding: 0.3rem 0.5rem !important;
         border-radius: 4px !important;
     }
     
-    [data-testid="stFileUploader"]:hover, .download-link:hover {
+    [data-testid="stFileUploader"]:hover {
         border-color: #666 !important;
     }
     
     /* Masquer les éléments superflus de l'uploader */
-    [data-testid="stFileUploader"] div:first-child {
-        display: none;
-    }
+    [data-testid="stFileUploader"] div:first-child, 
     [data-testid="stFileUploader"] small {
         display: none;
     }
     
-    /* Style des liens de téléchargement */
+    /* Style des boutons de téléchargement */
     .download-link {
         text-decoration: none !important;
         color: #666 !important;
         font-size: 14px !important;
+        background-color: transparent !important;
+        border: 1px dashed #ccc !important;
+        padding: 0.3rem 0.5rem !important;
+        border-radius: 4px !important;
         margin-right: 0.5rem;
         display: inline-block;
     }
+
+    .download-link:hover {
+        border-color: #666 !important;
+    }
+
+    /* Style du conteneur des boutons */
     .download-container {
         display: flex;
         gap: 0.5rem;
     }
+
+    /* Style des boutons d'ajout */
+    [data-testid="baseButton-secondary"] {
+        background: transparent !important;
+        border: none !important;
+        color: #666 !important;
+        font-size: 15px !important;
+        padding: 0 !important;
+        margin-top: -5px !important;
+    }
     </style>
-""")
+""", unsafe_allow_html=True)
 
 # Initialisation session state
 if 'risk_families' not in st.session_state:
