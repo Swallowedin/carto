@@ -6,12 +6,20 @@ import base64
 import plotly.graph_objects as go
 from collections import defaultdict
 
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+import json
+import base64
+import plotly.graph_objects as go
+from collections import defaultdict
+
 # Configuration de la page
 st.set_page_config(
     page_title="Gestion des Risques",
     layout="wide",
     initial_sidebar_state="collapsed",
-    menu_items=None  # Ceci cache la barre Streamlit Cloud
+    menu_items=None
 )
 
 st.markdown("""
@@ -21,83 +29,150 @@ st.markdown("""
    footer {visibility: hidden;}
    header {visibility: hidden;}
 
-   /* Style de base de la page */
+   /* Style de base de la page - Plus compact */
    .block-container {
-       padding: 1rem 1rem 10rem !important;
+       padding: 0.5rem 0.5rem 5rem !important;
        max-width: 100% !important;
    }
+   
+   /* Réduction des espacements */
+   div[data-testid="stVerticalBlock"] > div {
+       padding: 0.2rem 0 !important;
+   }
 
-   /* Style de l'uploader */
+   /* Style plus austère pour les expansions */
+   .streamlit-expanderHeader {
+       font-size: 0.9rem !important;
+       padding: 0.3rem !important;
+       background: #fafafa !important;
+       border: none !important;
+   }
+
+   /* Style de l'uploader plus compact */
    [data-testid="stFileUploader"] {
        background-color: transparent !important;
-       border: 1px dashed #ccc !important;
-       padding: 0.3rem 0.5rem !important;
-       border-radius: 4px !important;
+       border: 1px solid #eee !important;
+       padding: 0.2rem 0.3rem !important;
+       border-radius: 3px !important;
        min-height: unset !important;
    }
    
    [data-testid="stFileUploader"]:hover {
-       border-color: #666 !important;
+       border-color: #ddd !important;
    }
 
-   /* Masquer complètement le texte "drag and drop" */
+   /* Masquer texte drag and drop */
    [data-testid="stFileUploader"] div {
        display: none !important;
    }
 
-   /* Ne garder que l'icône et le bouton browse */
+   /* Garder icône et bouton browse */
    [data-testid="stFileUploader"] section {
        display: flex;
-       gap: 0.5rem;
+       gap: 0.3rem;
        align-items: center;
    }
    
-   /* Style des boutons de téléchargement */
+   /* Style compact des boutons de téléchargement */
    .download-link {
        text-decoration: none !important;
        color: #666 !important;
-       font-size: 14px !important;
-       border: 1px dashed #ccc !important;
-       padding: 0.3rem 0.5rem !important;
-       border-radius: 4px !important;
+       font-size: 13px !important;
+       border: 1px solid #eee !important;
+       padding: 0.2rem 0.4rem !important;
+       border-radius: 3px !important;
    }
 
    .download-link:hover {
-       border-color: #666 !important;
+       border-color: #ddd !important;
    }
 
    .download-container {
        display: flex;
-       gap: 0.5rem;
+       gap: 0.3rem;
        align-items: center;
-       padding-top: 0.2rem;
+       padding-top: 0.1rem;
    }
 
-   /* Ajustement des marges */
+   /* Réduction des marges titres */
    h3 {
        margin: 0 !important;
        padding: 0 !important;
+       font-size: 1rem !important;
    }
 
-   /* Style des onglets */
+   /* Style compact des onglets */
    .stTabs [data-baseweb="tab-list"] {
-       gap: 2rem;
-       margin-top: 1rem;
+       gap: 1rem;
+       margin-top: 0.5rem;
    }
 
    .stTabs [data-baseweb="tab"] {
-       padding-top: 0 !important;
-       padding-bottom: 0 !important;
+       padding: 0.2rem 0.5rem !important;
+       font-size: 0.9rem !important;
    }
 
-   /* Style du bouton d'ajout */
+   /* Style minimaliste du bouton d'ajout */
    [data-testid="baseButton-secondary"] {
        background: transparent !important;
        border: none !important;
        color: #666 !important;
-       font-size: 15px !important;
+       font-size: 14px !important;
        padding: 0 !important;
-       margin-top: -5px !important;
+       margin: 0 !important;
+   }
+
+   /* Réduction taille des inputs */
+   .stTextInput input, .stTextArea textarea {
+       padding: 0.3rem !important;
+       font-size: 0.9rem !important;
+   }
+   
+   /* Style compact des checkboxes */
+   .stCheckbox {
+       padding: 0.1rem !important;
+       margin: 0 !important;
+   }
+   .stCheckbox label {
+       font-size: 0.85rem !important;
+   }
+   
+   /* Réduction marges boutons */
+   .stButton {
+       margin: 0.1rem 0 !important;
+   }
+   .stButton button {
+       padding: 0.2rem 0.5rem !important;
+       font-size: 0.85rem !important;
+   }
+   
+   /* Style compact select boxes */
+   .stSelectbox {
+       margin: 0.1rem 0 !important;
+   }
+   .stSelectbox > div > div {
+       padding: 0.2rem !important;
+   }
+   
+   /* Réduction marges colonnes */
+   .row-widget {
+       margin: 0.1rem 0 !important;
+   }
+
+   /* Métriques compactes */
+   .metric-container {
+       padding: 0.3rem;
+       border-radius: 0.25rem;
+       background-color: #f8f9fa;
+       margin: 0.2rem 0;
+   }
+   .metric-value {
+       font-size: 1.1rem;
+       font-weight: bold;
+   }
+   .metric-label {
+       font-size: 0.75rem;
+       color: #6c757d;
    }
    </style>
 """, unsafe_allow_html=True)
