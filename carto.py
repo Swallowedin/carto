@@ -14,77 +14,92 @@ st.set_page_config(
     menu_items=None  # Ceci cache la barre Streamlit Cloud
 )
 
-# Styles CSS complets
 st.markdown("""
-    <style>
-    /* Cacher la barre Streamlit */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+   <style>
+   /* Cacher la barre Streamlit */
+   #MainMenu {visibility: hidden;}
+   footer {visibility: hidden;}
+   header {visibility: hidden;}
 
-    /* Style de base de la page */
-    .block-container {
-        padding: 1rem 1rem 10rem !important;
-        max-width: 100% !important;
-    }
+   /* Style de base de la page */
+   .block-container {
+       padding: 1rem 1rem 10rem !important;
+       max-width: 100% !important;
+   }
 
-    /* Style de l'uploader */
-    [data-testid="stFileUploader"] {
-        background-color: transparent !important;
-        border: 1px dashed #ccc !important;
-        padding: 0.3rem 0.5rem !important;
-        border-radius: 4px !important;
-        min-height: unset !important;
-    }
-    
-    [data-testid="stFileUploader"]:hover {
-        border-color: #666 !important;
-    }
-    
-    /* Masquer les textes superflus */
-    [data-testid="stFileUploader"] div:first-child,
-    [data-testid="stFileUploader"] small {
-        display: none !important;
-    }
-    
-    /* Style des boutons de téléchargement */
-    .download-link {
-        text-decoration: none !important;
-        color: #666 !important;
-        font-size: 14px !important;
-        border: 1px dashed #ccc !important;
-        padding: 0.3rem 0.5rem !important;
-        border-radius: 4px !important;
-    }
+   /* Style de l'uploader */
+   [data-testid="stFileUploader"] {
+       background-color: transparent !important;
+       border: 1px dashed #ccc !important;
+       padding: 0.3rem 0.5rem !important;
+       border-radius: 4px !important;
+       min-height: unset !important;
+   }
+   
+   [data-testid="stFileUploader"]:hover {
+       border-color: #666 !important;
+   }
 
-    .download-link:hover {
-        border-color: #666 !important;
-    }
+   /* Masquer complètement le texte "drag and drop" */
+   [data-testid="stFileUploader"] div {
+       display: none !important;
+   }
 
-    .download-container {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        padding-top: 0.2rem;
-    }
+   /* Ne garder que l'icône et le bouton browse */
+   [data-testid="stFileUploader"] section {
+       display: flex;
+       gap: 0.5rem;
+       align-items: center;
+   }
+   
+   /* Style des boutons de téléchargement */
+   .download-link {
+       text-decoration: none !important;
+       color: #666 !important;
+       font-size: 14px !important;
+       border: 1px dashed #ccc !important;
+       padding: 0.3rem 0.5rem !important;
+       border-radius: 4px !important;
+   }
 
-    /* Ajustement des marges */
-    h3 {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+   .download-link:hover {
+       border-color: #666 !important;
+   }
 
-    /* Style des onglets */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
-        margin-top: 1rem;
-    }
+   .download-container {
+       display: flex;
+       gap: 0.5rem;
+       align-items: center;
+       padding-top: 0.2rem;
+   }
 
-    .stTabs [data-baseweb="tab"] {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
-    </style>
+   /* Ajustement des marges */
+   h3 {
+       margin: 0 !important;
+       padding: 0 !important;
+   }
+
+   /* Style des onglets */
+   .stTabs [data-baseweb="tab-list"] {
+       gap: 2rem;
+       margin-top: 1rem;
+   }
+
+   .stTabs [data-baseweb="tab"] {
+       padding-top: 0 !important;
+       padding-bottom: 0 !important;
+   }
+
+   /* Style du bouton d'ajout */
+   [data-testid="baseButton-secondary"] {
+       background: transparent !important;
+       border: none !important;
+       color: #666 !important;
+       font-size: 15px !important;
+       padding: 0 !important;
+       margin-top: -5px !important;
+   }
+   </style>
 """, unsafe_allow_html=True)
 
 # Initialisation session state
@@ -118,7 +133,7 @@ def save_to_json():
     b64 = base64.b64encode(json_str.encode()).decode()
     current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
     filename = f"risk_data_{current_time}.json"
-    return f'<a class="download-link" href="data:file/json;base64,{b64}" download="{filename}">JSON</a>'
+    return f'<a class="download-link" href="data:file/json;base64,{b64}" download="{filename}">⬇️ JSON</a>'
 
 def save_to_csv():
     """Exporte les données en CSV"""
@@ -145,9 +160,11 @@ def save_to_csv():
         b64 = base64.b64encode(csv.encode()).decode()
         current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"risk_data_{current_time}.csv"
-        return f'<a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">CSV</a>'
+        return f'<a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">⬇️ CSV</a>'
     return ""
-	
+
+
+
 def load_from_json(uploaded_file):
     """Charge les données depuis un fichier JSON"""
     try:
@@ -269,10 +286,9 @@ with col2:
     upload_col, export_col = st.columns([1, 1])
     with upload_col:
         uploaded_file = st.file_uploader(
-            "",
+            "⬆️ Import",  # Ajout d'une icône cohérente
             type=["json", "csv"], 
-            label_visibility="collapsed",
-            help="Formats acceptés : JSON, CSV"
+            label_visibility="collapsed"
         )
         if uploaded_file:
             if uploaded_file.type == "application/json":
@@ -281,10 +297,7 @@ with col2:
                 load_from_csv(uploaded_file)
     with export_col:
         st.markdown(
-            f"""<div class="download-container">
-                {save_to_json()}
-                {save_to_csv()}
-            </div>""", 
+            f"""<div class="download-container">{save_to_json()} {save_to_csv()}</div>""", 
             unsafe_allow_html=True
         )
 
