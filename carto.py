@@ -287,10 +287,13 @@ def add_risk(family_key, risk_name, description, processes=None):
         "measures": {k: [] for k in MEASURE_TYPES}
     }
 
-def add_measure(family_key, risk_key, measure_type, measure):
-    """Ajoute une nouvelle mesure à un risque"""
-    if measure:
-        st.session_state.risk_families[family_key]["risks"][risk_key]["measures"][measure_type].append(measure)
+def add_measure(family_key, risk_key, measure_type, measure_text):
+    """Ajoute une ou plusieurs mesures à un risque"""
+    if measure_text:
+        # Sépare le texte en mesures individuelles basées sur les sauts de ligne
+        measures = [m.strip() for m in measure_text.split('\n') if m.strip()]
+        for measure in measures:
+            st.session_state.risk_families[family_key]["risks"][risk_key]["measures"][measure_type].append(measure)
 
 def delete_risk(family_key, risk_key):
     """Supprime un risque"""
@@ -424,8 +427,14 @@ with tab1:
                     selected_processes = st.multiselect("Processus", PROCESSES)
                 
                 # Section des mesures
-                st.markdown("###### Mesures")
-                measure_text = st.text_area("Description", height=80, key=f"measure_text_{family_key}")
+                st.markdown('<span style="color: #666; font-size: 0.85rem;">Mesures</span>', unsafe_allow_html=True)
+                measure_text = st.text_area(
+                    "Description",
+                    height=80,
+                    key=f"measure_text_{family_key}",
+                    help="Saisissez une mesure par ligne pour en ajouter plusieurs à la fois",
+                    placeholder="Une mesure par ligne..."
+                )
                 measure_cols = st.columns([3, 3, 3, 3, 3, 1])
                 
                 # Sélection des types de mesures
