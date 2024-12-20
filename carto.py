@@ -216,14 +216,32 @@ def get_risks_by_process(process_name):
                 })
     return process_risks
 
-with export_col:
-    st.markdown(
-        f"""<div class="download-container">
-            {save_to_json()}
-            {save_to_csv()}
-        </div>""", 
-        unsafe_allow_html=True
-    )
+# Interface principale
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.markdown("### Gestion des Risques")
+with col2:
+    upload_col, export_col = st.columns([1, 1])
+    with upload_col:
+        uploaded_file = st.file_uploader(
+            "",
+            type=["json", "csv"], 
+            label_visibility="collapsed",
+            help="Formats acceptés : JSON, CSV"
+        )
+        if uploaded_file:
+            if uploaded_file.type == "application/json":
+                load_from_json(uploaded_file)
+            else:
+                load_from_csv(uploaded_file)
+    with export_col:
+        st.markdown(
+            f"""<div class="download-container">
+                {save_to_json()}
+                {save_to_csv()}
+            </div>""",
+            unsafe_allow_html=True
+        )
 
 # Onglets principaux
 tab1, tab2, tab3 = st.tabs([
