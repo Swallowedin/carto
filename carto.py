@@ -463,120 +463,6 @@ def get_risks_by_process(process_name):
                 })
     return process_risks
 
-# Tab 4: Mesures & Actions
-with tab4:
-    # Filtres en haut de page
-    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-    with col1:
-        view_mode = st.radio("Mode d'affichage", 
-                          ["Tableau de bord", "Suivi des mesures", "Actions à suivre"], 
-                          horizontal=True)
-    with col2:
-        filter_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
-    with col3:
-        filter_measure = st.selectbox("Type", ["Tous"] + list(MEASURE_TYPES.values()))
-    with col4:
-        filter_status = st.selectbox("Statut", ["Tous"] + MEASURE_STATUS)
-
-    # Récupération des données
-    df_measures = get_measures_by_process(filter_process)
-    df_actions = get_all_actions()
-
-    # Application des filtres
-    if filter_measure != "Tous":
-        df_measures = df_measures[df_measures["type"] == filter_measure]
-    if filter_status != "Tous":
-        df_measures = df_measures[df_measures["statut"] == filter_status]
-
-    if view_mode == "Tableau de bord":
-        # Métriques globales
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            total_measures = len(df_measures)
-            st.metric("Mesures", total_measures)
-        with col2:
-            measures_evaluated = df_measures[df_measures["statut"] != "Non évalué"]
-            st.metric("Évaluées", f"{len(measures_evaluated)} ({len(measures_evaluated)/total_measures*100:.0f}%)")
-        with col3:
-            measures_effective = df_measures[df_measures["statut"] == "Efficace"]
-            st.metric("Efficaces", f"{len(measures_effective)} ({len(measures_effective)/total_measures*100:.0f}%)")
-        with col4:
-            actions_in_progress = len(df_actions[df_actions["statut"].isin(["À faire", "En cours"])])
-            st.metric("Actions en cours", actions_in_progress)
-
-        # Graphiques et statistiques
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("Statut des mesures")
-            status_counts = df_measures["statut"].value_counts()
-            st.bar_chart(status_counts)
-        with col2:
-            st.subheader("Actions par priorité")
-            priority_counts = df_actions["priorite"].value_counts()
-            st.bar_chart(priority_counts)
-
-    elif view_mode == "Suivi des mesures":
-        # Tableau des mesures avec évaluation
-        for idx, measure in df_measures.iterrows():
-            with st.expander(f"{measure['famille']} - {measure['risque']}", expanded=False):
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    st.write("**Mesure:**", measure['mesure'])
-                    st.write("**Processus:**", measure['processus'])
-                    st.write("**Type:**", measure['type'])
-                with col2:
-                    new_status = st.selectbox(
-                        "Statut",
-                        MEASURE_STATUS,
-                        index=MEASURE_STATUS.index(measure['statut']),
-                        key=f"status_{measure['id']}"
-                    )
-                    new_performance = st.text_area(
-                        "Évaluation",
-                        value=measure['performance'],
-                        key=f"perf_{measure['id']}"
-                    )
-                    if st.button("Mettre à jour", key=f"update_{measure['id']}"):
-                        update_measure_status(measure['id'], new_status, new_performance)
-                        st.rerun()
-
-                # Afficher les actions liées
-                actions = df_actions[df_actions["mesure_id"] == measure["id"]]
-                if len(actions) > 0:
-                    st.write("**Actions associées:**")
-                    for _, action in actions.iterrows():
-                        st.markdown(
-                            f"* {action['description']} - "
-                            f"*{action['responsable']}* - "
-                            f"📅 {action['deadline']} - "
-                            f"_{action['statut']}_"
-                        )
-
-                # Ajouter une nouvelle action
-                if st.button("+ Nouvelle action", key=f"new_action_{measure['id']}"):
-                    st.session_state[f"show_action_form_{measure['id']}"] = True
-
-                if st.session_state.get(f"show_action_form_{measure['id']}", False):
-                    with st.form(f"action_form_{measure['id']}"):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            action_desc = st.text_area("Description")
-                            action_resp = st.text_input("Responsable")
-                        with col2:
-                            action_deadline = st.date_input("Échéance")
-                            action_priority = st.selectbox("Priorité", ACTION_PRIORITY)
-                        
-                        submit_col1, submit_col2 = st.columns([1, 4])
-                        with submit_col1:
-                            if st.form_submit_button("Ajouter"):
-                                add_action(measure['id'], action_desc, action_resp, 
-                                         action_deadline, action_priority)
-                                st.session_state[f"show_action_form_{measure['id']}"] = False
-                                st.rerun()
-                        with submit_col2:
-                            if st.form_submit_button("Annuler"):
-                                st.session_state[f"show_action_form_{measure['id']}"] =
-
 # Interface principale
 col1, col2 = st.columns([3, 1])
 with col1:
@@ -608,7 +494,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "🔍 Mesures & Actions"
 ])
 
-# Tab 1: Gestion des risques par famille
+# Tab 1: Gestion par famille
 with tab1:
     if st.button("+ Nouvelle Famille", use_container_width=False, type="secondary"):
         st.session_state.show_family_form = True
@@ -646,7 +532,6 @@ with tab1:
     # Affichage des familles de risques
     for family_key, family_data in st.session_state.risk_families.items():
         with st.expander(f"📁 {family_data['name']}", expanded=False):
-            # Bouton d'ajout de risque
             cols = st.columns([20, 1])
             with cols[1]:
                 if st.button("＋", key=f"add_risk_{family_key}", help="Ajouter un risque", type="secondary"):
@@ -708,29 +593,30 @@ with tab1:
             # Affichage des risques existants
             for risk_key, risk_data in family_data["risks"].items():
                 if (selected_process == "Tous" or selected_process in risk_data.get("processes", [])):
-                    measure_counts = {
-                        MEASURE_TYPES[m_type]: len(measures) 
-                        for m_type, measures in risk_data["measures"].items()
-                    }
-                    
-                    cols = st.columns([8, 4, 4, 1])
-                    with cols[0]:
-                        st.markdown(f"**{risk_key.split(' - ')[1]}**")
-                    with cols[1]:
-                        st.markdown(", ".join(risk_data["processes"][:2] + (["..."] if len(risk_data["processes"]) > 2 else [])))
-                    with cols[2]:
-                        st.markdown(" ".join([
-                            f'<span style="background:#f5f5f5;padding:0 0.25rem;border-radius:2px;font-size:0.7rem">{t}:{c}</span>'
-                            for t, c in measure_counts.items() if c > 0
-                        ]), unsafe_allow_html=True)
-                    with cols[3]:
-                        if st.button("📝", key=f"edit_{risk_key}"):
-                            st.session_state[f"edit_risk_{risk_key}"] = True
+                    if not search_term or search_term.lower() in risk_key.lower():
+                        measure_counts = {
+                            MEASURE_TYPES[m_type]: len(measures) 
+                            for m_type, measures in risk_data["measures"].items()
+                        }
+                        
+                        cols = st.columns([8, 4, 4, 1])
+                        with cols[0]:
+                            st.markdown(f"**{risk_key.split(' - ')[1]}**")
+                        with cols[1]:
+                            st.markdown(", ".join(risk_data["processes"][:2] + 
+                                      (["..."] if len(risk_data["processes"]) > 2 else [])))
+                        with cols[2]:
+                            st.markdown(" ".join([
+                                f'<span style="background:#f5f5f5;padding:0 0.25rem;'
+                                f'border-radius:2px;font-size:0.7rem">{t}:{c}</span>'
+                                for t, c in measure_counts.items() if c > 0
+                            ]), unsafe_allow_html=True)
+                        with cols[3]:
+                            if st.button("📝", key=f"edit_{risk_key}"):
+                                st.session_state[f"edit_risk_{risk_key}"] = True
 
 # Tab 2: Vue par processus
 with tab2:
-    st.header("Vue par Processus")
-    
     selected_process_view = st.selectbox(
         "Sélectionner un processus",
         PROCESSES,
@@ -770,23 +656,21 @@ with tab2:
                 st.write(risk["description"])
                 for measure_type, measures in risk["measures"].items():
                     if measures:
-                        st.write(f"**{MEASURE_TYPES[measure_type]}**")
+                        st.markdown(f"**{MEASURE_TYPES[measure_type]}**")
                         for measure in measures:
-                            st.write(f"- {measure}")
+                            st.markdown(f"- {measure}")
     else:
         st.info("Aucun risque associé à ce processus")
 
 # Tab 3: Vue par service
 with tab3:
-    st.header("Vue par Service")
-    
     selected_service = st.selectbox(
         "Sélectionner un service",
         PROCESSES,
         key="service_view_selector"
     )
     
-    # Matrice des risques
+    # Création de la matrice de risques
     risk_matrix = defaultdict(list)
     for family_key, family_data in st.session_state.risk_families.items():
         for risk_key, risk_data in family_data["risks"].items():
@@ -826,74 +710,178 @@ with tab3:
 
 # Tab 4: Mesures & Actions
 with tab4:
-    st.header("Suivi des Mesures et Actions")
-    
-    # Filtres
-    col1, col2, col3 = st.columns(3)
+    # Filtres en haut de page
+    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
     with col1:
-        view_type = st.radio("Vue", ["Par processus", "Par famille", "Par type de mesure"], horizontal=True)
+        view_mode = st.radio("Mode d'affichage", 
+                          ["Tableau de bord", "Suivi des mesures", "Actions à suivre"], 
+                          horizontal=True)
     with col2:
-        filter_process = st.selectbox("Filtrer par processus", ["Tous"] + PROCESSES)
+        filter_process = st.selectbox("Processus", ["Tous"] + PROCESSES)
     with col3:
-        filter_measure = st.selectbox("Filtrer par type", ["Tous"] + list(MEASURE_TYPES.values()))
+        filter_measure = st.selectbox("Type", ["Tous"] + list(MEASURE_TYPES.values()))
+    with col4:
+        filter_status = st.selectbox("Statut", ["Tous"] + MEASURE_STATUS)
 
     # Récupération des données
     df_measures = get_measures_by_process(filter_process)
-    
-    # Application des filtres supplémentaires
+    df_actions = get_all_actions()
+
+    # Application des filtres
     if filter_measure != "Tous":
         df_measures = df_measures[df_measures["type"] == filter_measure]
+    if filter_status != "Tous":
+        df_measures = df_measures[df_measures["statut"] == filter_status]
 
-    # Organisation de la vue selon le choix
-    if view_type == "Par processus":
-        unique_processes = df_measures["processus"].str.split(", ").explode().unique()
-        for process in sorted(unique_processes):
-            process_measures = df_measures[df_measures["processus"].str.contains(process, na=False)]
-            with st.expander(f"📎 {process} ({len(process_measures)} mesures)", expanded=True):
-                st.dataframe(
-                    process_measures[["famille", "risque", "type", "mesure"]], 
-                    hide_index=True,
-                    use_container_width=True
-                )
-                
-                # Section des actions
-                st.markdown("##### Actions à mettre en œuvre")
-                action_text = st.text_area("Nouvelle action", key=f"action_{process}")
-                col1, col2 = st.columns([1, 4])
-                with col1:
-                    st.button("Ajouter", key=f"add_action_{process}")
+    if view_mode == "Tableau de bord":
+        # Métriques globales
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            total_measures = len(df_measures)
+            st.metric("Mesures", total_measures)
+        with col2:
+            measures_evaluated = df_measures[df_measures["statut"] != "Non évalué"]
+            pct_evaluated = len(measures_evaluated)/total_measures*100 if total_measures > 0 else 0
+            st.metric("Évaluées", f"{len(measures_evaluated)} ({pct_evaluated:.0f}%)")
+        with col3:
+            measures_effective = df_measures[df_measures["statut"] == "Efficace"]
+            pct_effective = len(measures_effective)/total_measures*100 if total_measures > 0 else 0
+            st.metric("Efficaces", f"{len(measures_effective)} ({pct_effective:.0f}%)")
+        with col4:
+            actions_in_progress = len(df_actions[df_actions["statut"].isin(["À faire", "En cours"])])
+            st.metric("Actions en cours", actions_in_progress)
 
-    elif view_type == "Par famille":
-        for famille in sorted(df_measures["famille"].unique()):
-            family_measures = df_measures[df_measures["famille"] == famille]
-            with st.expander(f"📁 {famille} ({len(family_measures)} mesures)", expanded=True):
-                st.dataframe(
-                    family_measures[["risque", "processus", "type", "mesure"]], 
-                    hide_index=True,
-                    use_container_width=True
-                )
+        # Graphiques et statistiques
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Statut des mesures")
+            if not df_measures.empty:
+                status_counts = df_measures["statut"].value_counts()
+                colors = [STATUS_COLORS[status] for status in status_counts.index]
+                st.bar_chart(status_counts)
+        with col2:
+            st.subheader("Actions par priorité")
+            if not df_actions.empty:
+                              priority_counts = df_actions["priorite"].value_counts()
+                st.bar_chart(priority_counts)
 
-    else:  # Par type de mesure
-        for measure_type in sorted(df_measures["type"].unique()):
-            type_measures = df_measures[df_measures["type"] == measure_type]
-            with st.expander(f"🔖 {measure_type} ({len(type_measures)} mesures)", expanded=True):
-                st.dataframe(
-                    type_measures[["famille", "risque", "processus", "mesure"]], 
-                    hide_index=True,
-                    use_container_width=True
-                )
+    elif view_mode == "Suivi des mesures":
+        # Vue tabulaire des mesures avec possibilité d'évaluation
+        if not df_measures.empty:
+            for idx, measure in df_measures.iterrows():
+                with st.expander(f"{measure['famille']} - {measure['risque']}", expanded=False):
+                    # Affichage des informations de la mesure
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.write("**Mesure:**", measure['mesure'])
+                        st.write("**Processus:**", measure['processus'])
+                        st.write("**Type:**", measure['type'])
+                    with col2:
+                        new_status = st.selectbox(
+                            "Statut",
+                            MEASURE_STATUS,
+                            index=MEASURE_STATUS.index(measure['statut']),
+                            key=f"status_{measure['id']}"
+                        )
+                        new_performance = st.text_area(
+                            "Évaluation",
+                            value=measure['performance'],
+                            key=f"perf_{measure['id']}"
+                        )
+                        if st.button("Mettre à jour", key=f"update_{measure['id']}"):
+                            update_measure_status(measure['id'], new_status, new_performance)
+                            st.rerun()
 
-    # Statistiques globales
-    st.markdown("---")
-    st.subheader("Statistiques")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total des mesures", len(df_measures))
-    with col2:
-        measures_by_type = df_measures["type"].value_counts()
-        st.metric("Type le plus utilisé", measures_by_type.index[0] if not measures_by_type.empty else "-")
-    with col3:
-        st.metric("Familles couvertes", df_measures["famille"].nunique())
+                    # Actions associées
+                    related_actions = df_actions[df_actions["mesure_id"] == measure["id"]]
+                    if len(related_actions) > 0:
+                        st.write("**Actions associées:**")
+                        for _, action in related_actions.iterrows():
+                            col1, col2, col3 = st.columns([2, 2, 1])
+                            with col1:
+                                st.markdown(f"- {action['description']}")
+                            with col2:
+                                st.markdown(f"👤 {action['responsable']} | 📅 {action['deadline']}")
+                            with col3:
+                                status_color = STATUS_COLORS.get(action['statut'], "#6c757d")
+                                st.markdown(f'<span style="color:{status_color}">{action["statut"]}</span>', unsafe_allow_html=True)
+
+                    # Bouton pour ajouter une nouvelle action
+                    if st.button("+ Nouvelle action", key=f"new_action_{measure['id']}"):
+                        st.session_state[f"show_action_form_{measure['id']}"] = True
+
+                    # Formulaire d'ajout d'action
+                    if st.session_state.get(f"show_action_form_{measure['id']}", False):
+                        with st.form(f"action_form_{measure['id']}"):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                action_desc = st.text_area("Description")
+                                action_resp = st.text_input("Responsable")
+                            with col2:
+                                action_deadline = st.date_input("Échéance")
+                                action_priority = st.selectbox("Priorité", ACTION_PRIORITY)
+                            
+                            submit_col1, submit_col2 = st.columns([1, 4])
+                            with submit_col1:
+                                if st.form_submit_button("Ajouter"):
+                                    add_action(measure['id'], action_desc, action_resp, 
+                                             action_deadline, action_priority)
+                                    st.session_state[f"show_action_form_{measure['id']}"] = False
+                                    st.rerun()
+                            with submit_col2:
+                                if st.form_submit_button("Annuler"):
+                                    st.session_state[f"show_action_form_{measure['id']}"] = False
+                                    st.rerun()
+        else:
+            st.info("Aucune mesure ne correspond aux critères sélectionnés")
+
+    else:  # Actions à suivre
+        # Filtres pour les actions
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            action_status_filter = st.selectbox("Statut des actions", ["Tous"] + ACTION_STATUS)
+        with col2:
+            action_priority_filter = st.selectbox("Priorité", ["Tous"] + ACTION_PRIORITY)
+        with col3:
+            action_date_filter = st.selectbox("Date", ["Toutes", "À échéance", "En retard"])
+
+        # Filtrage des actions
+        filtered_actions = df_actions.copy()
+        if action_status_filter != "Tous":
+            filtered_actions = filtered_actions[filtered_actions["statut"] == action_status_filter]
+        if action_priority_filter != "Tous":
+            filtered_actions = filtered_actions[filtered_actions["priorite"] == action_priority_filter]
+        if action_date_filter != "Toutes":
+            today = pd.Timestamp.now().date()
+            if action_date_filter == "En retard":
+                filtered_actions = filtered_actions[filtered_actions["deadline"] < today]
+            elif action_date_filter == "À échéance":
+                filtered_actions = filtered_actions[filtered_actions["deadline"] == today]
+
+        # Affichage des actions
+        if not filtered_actions.empty:
+            for _, action in filtered_actions.iterrows():
+                with st.expander(
+                    f"{action['priorite']} | {action['description'][:50]}{'...' if len(action['description']) > 50 else ''}", 
+                    expanded=False
+                ):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.write("**Description:**", action['description'])
+                        st.write("**Responsable:**", action['responsable'])
+                        st.write("**Échéance:**", action['deadline'])
+                    with col2:
+                        new_status = st.selectbox(
+                            "Statut",
+                            ACTION_STATUS,
+                            index=ACTION_STATUS.index(action['statut']),
+                            key=f"action_status_{action['id']}"
+                        )
+                        if st.button("Mettre à jour", key=f"update_action_{action['id']}"):
+                            update_action(action['id'], statut=new_status)
+                            st.rerun()
+        else:
+            st.info("Aucune action ne correspond aux critères sélectionnés")
 
 # Gestion des notifications
 if "notifications" not in st.session_state:
